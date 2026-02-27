@@ -265,6 +265,24 @@ export function getRoutesAtStop(stopIdx: number): Route[] {
   return Array.from(routeIdxSet).map(getRoute);
 }
 
+/** Returns unique (route, directionId) pairs for trips that actually stop here. */
+export function getRouteDirectionsAtStop(stopIdx: number): { route: Route; directionId: number }[] {
+  const stopTimes = gtfs.stopTimesByStop[stopIdx] ?? [];
+  const seen = new Set<string>();
+  const result: { route: Route; directionId: number }[] = [];
+  for (const [tripIdx] of stopTimes) {
+    const trip = gtfs.trips[tripIdx];
+    if (!trip) continue;
+    const [routeIdx, , directionId] = trip;
+    const key = `${routeIdx}-${directionId}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push({ route: getRoute(routeIdx), directionId });
+    }
+  }
+  return result;
+}
+
 // ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------

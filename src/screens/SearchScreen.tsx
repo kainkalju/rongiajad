@@ -15,7 +15,7 @@ import RouteChip from '../components/RouteChip';
 import {
   searchStops,
   searchRoutes,
-  getRoutesAtStop,
+  getRouteDirectionsAtStop,
   getStopsForRoute,
 } from '../data/parser';
 import type { Stop, Route } from '../data/types';
@@ -96,7 +96,7 @@ export default function SearchScreen({ navigation }: Props) {
             );
           }
           if (item.type === 'stop') {
-            const routesAtStop = getRoutesAtStop(item.stop.idx);
+            const routeDirections = getRouteDirectionsAtStop(item.stop.idx);
             return (
               <TouchableOpacity
                 style={styles.stopRow}
@@ -107,13 +107,13 @@ export default function SearchScreen({ navigation }: Props) {
               >
                 <Text style={styles.stopName}>{item.stop.name}</Text>
                 <View style={styles.chips}>
-                  {routesAtStop.map(r => {
-                    const stopList = getStopsForRoute(r.idx, 0);
+                  {routeDirections.map(({ route: r, directionId }) => {
+                    const stopList = getStopsForRoute(r.idx, directionId);
                     const origin = stopList[0]?.name;
                     const terminal = stopList[stopList.length - 1]?.name;
                     return (
                       <RouteChip
-                        key={r.idx}
+                        key={`${r.idx}-${directionId}`}
                         route={r}
                         originStop={origin}
                         terminalStop={terminal}
