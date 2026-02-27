@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Rongiajad",
+    "slug": "rongiajad",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#ff711d"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ee.elron.rongiajad",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Rongiajad kasutab asukohta lähima rongijaama leidmiseks."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ff711d"
+      },
+      "package": "ee.elron.rongiajad",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Rongiajad kasutab asukohta lähima rongijaama leidmiseks."
+        }
+      ]
+    ]
+  }
+}
