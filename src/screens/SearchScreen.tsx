@@ -102,7 +102,7 @@ export default function SearchScreen({ navigation }: Props) {
                 style={styles.stopRow}
                 onPress={() => {
                   Keyboard.dismiss();
-                  navigation.navigate('Stop', { stopIdx: item.stop.idx });
+                  navigation.replace('Stop', { stopIdx: item.stop.idx });
                 }}
               >
                 <Text style={styles.stopName}>{item.stop.name}</Text>
@@ -117,6 +117,10 @@ export default function SearchScreen({ navigation }: Props) {
                         route={r}
                         originStop={origin}
                         terminalStop={terminal}
+                        onPress={() => {
+                          Keyboard.dismiss();
+                          navigation.replace('Line', { routeIdx: r.idx, stopIdx: item.stop.idx });
+                        }}
                       />
                     );
                   })}
@@ -133,7 +137,7 @@ export default function SearchScreen({ navigation }: Props) {
                 style={styles.routeRow}
                 onPress={() => {
                   Keyboard.dismiss();
-                  navigation.navigate('Line', { routeIdx: item.route.idx });
+                  navigation.replace('Line', { routeIdx: item.route.idx });
                 }}
               >
                 <View style={styles.routeBadge}>
