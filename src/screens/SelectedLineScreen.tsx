@@ -37,6 +37,9 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
 
   const selectedIndex = stopItems.findIndex(s => s.stop.idx === stopIdx);
 
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+
   // Scroll to selected stop after layout
   useEffect(() => {
     if (selectedIndex >= 0) {
@@ -71,15 +74,16 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
           const isSelected = item.stop.idx === stopIdx;
           const depMins = timeToMinutes(item.dep);
           const timeLabel = minutesToHHMM(depMins);
+          const isPast = depMins < nowMins;
           return (
             <TouchableOpacity
               style={[styles.row, isSelected && styles.rowSelected]}
               onPress={() => navigation.navigate('Stop', { stopIdx: item.stop.idx, directionId: trip[2] })}
             >
-              <Text style={[styles.time, isSelected && styles.timeSelected]}>
+              <Text style={[styles.time, isPast && styles.timePast, isSelected && styles.timeSelected]}>
                 {timeLabel}
               </Text>
-              <Text style={[styles.stopName, isSelected && styles.stopNameSelected]}>
+              <Text style={[styles.stopName, isPast && styles.stopNamePast, isSelected && styles.stopNameSelected]}>
                 {item.stop.name}
               </Text>
             </TouchableOpacity>
@@ -121,6 +125,9 @@ const styles = StyleSheet.create({
     color: '#111',
     width: 52,
   },
+  timePast: {
+    color: '#aaa',
+  },
   timeSelected: {
     color: '#ff711d',
     fontWeight: '700',
@@ -129,6 +136,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#111',
+  },
+  stopNamePast: {
+    color: '#aaa',
   },
   stopNameSelected: {
     color: '#ff711d',
