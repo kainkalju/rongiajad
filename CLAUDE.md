@@ -28,9 +28,9 @@ rongiajad/
 - Search (modal overlay)
 - Stop detail (tabs: Now / Lines)
 - Line detail (tabs: Weekday / Saturday / Sunday)
-- Selected line — full stop sequence for a specific trip, with the origin stop highlighted
+- Selected line — full stop sequence for a specific trip, with the origin stop highlighted; tapping any stop navigates to Stop detail filtered to the same direction
 
-**State management:** React Context or Zustand for favourites and current location
+**State management:** Zustand for favourites and current location. Favourites (`favStops`, `favRoutes`) are persisted across restarts via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state is intentionally not persisted.
 
 **Location:** `expo-location` for GPS; find nearest stop by haversine distance to `stops.txt` coordinates
 
@@ -57,7 +57,7 @@ Source: GTFS (General Transit Feed Specification) static feed from Elron, stored
 **Key query patterns:**
 
 1. **Nearest stop** — haversine distance from GPS coords to every stop in `stops.txt`
-2. **Upcoming departures at a stop** — join `stop_times` → `trips` → `calendar` filtered by today's `service_id` and current time
+2. **Upcoming departures at a stop** — join `stop_times` → `trips` → `calendar` filtered by today's `service_id` and current time; optional `directionId` param filters to one travel direction
 3. **Line timetable at a stop** — group departures by hour; separate tabs for Tööpäev / Laupäev / Pühapäev
 4. **Stop list for a line** — ordered `stop_times` rows for one `trip_id` (canonical trip per direction)
 5. **Search** — fuzzy match on `stop_name` and `route_short_name` / `route_long_name`
@@ -81,7 +81,7 @@ Brand colour: `#ff711d` (Elron orange). White text on orange surfaces.
 | `selected-train-stop-departures.webp` | Stop detail | Orange header: back arrow, stop name, favourite star (☆), location pin. Sub-tabs **Praegu** (Now) / **Liinid** (Lines). Departure rows same layout as home: time range + route + countdown. Tomorrow section header below current departures. |
 | `selected-line-list-of-stops.webp` | Line — stop list | Header: back, line name ("Tallinn – Tartu (ekspress)"), location pin. Vertical dashed timeline on left; stop names listed in sequence. |
 | `selected-line-departure-times.webp` | Line — timetable | Header: back, route name ("Tartu – Tallinn"), stop name subtitle ("Kaarepere"), favourite star. Day-type tabs: **Tööpäev** / **Laupäev** / **Pühapäev**. Two-column grid: bold hour on left, minutes on right. Current hour highlighted in orange. |
-| `att.GDRL1u2Un3CevuZo7HBC3_JJoPlXf5cmie3lmQnxS2A.png.JPEG` | Selected line — trip stops | Orange header: back arrow, title format `{shortName} - {originStop} - {terminalStop}` (e.g. "R15 - Tallinn - Paldiski"), location pin. Flat list of all stops in trip order: departure time on the left, stop name on the right. Currently selected stop highlighted in orange. Screen navigated to by tapping a departure row. |
+| `att.GDRL1u2Un3CevuZo7HBC3_JJoPlXf5cmie3lmQnxS2A.png.JPEG` | Selected line — trip stops | Orange header: back arrow, title format `{shortName} - {originStop} - {terminalStop}` (e.g. "R15 - Tallinn - Paldiski"), favourite star (☆/★). Flat list of all stops in trip order: departure time on the left, stop name on the right. Currently selected stop highlighted in orange. Tapping a stop navigates to StopScreen filtered to the same direction. Screen navigated to by tapping a departure row. |
 
 **Component patterns:**
 - Departure row: `[train icon] [bold time range]  [route label]  [countdown bold right]`
