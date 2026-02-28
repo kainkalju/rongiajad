@@ -12,7 +12,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "ee.elron.rongiajad",
+      "bundleIdentifier": "com.kalju.rongiajad",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Rongiajad kasutab asukohta lähima rongijaama leidmiseks."
       }
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ff711d"
       },
-      "package": "ee.elron.rongiajad",
+      "package": "com.kalju.rongiajad",
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "plugins": [
