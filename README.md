@@ -4,7 +4,7 @@ Estonian train schedule app for iOS and Android, built with React Native + Expo.
 
 Shows upcoming Elron departures from the nearest station based on your GPS location. All schedule data is bundled offline — no internet required to check trains.
 
-![Home screen](screenshots/homescreen.png)
+![Home screen](homescreen.png)
 
 ---
 
