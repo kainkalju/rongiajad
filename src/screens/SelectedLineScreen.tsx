@@ -75,6 +75,7 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
           const depMins = timeToMinutes(item.dep);
           const timeLabel = minutesToHHMM(depMins);
           const isPast = depMins < nowMins;
+          const minsLeft = depMins - nowMins;
           return (
             <TouchableOpacity
               style={[styles.row, isSelected && styles.rowSelected]}
@@ -86,6 +87,11 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
               <Text style={[styles.stopName, isPast && styles.stopNamePast, isSelected && styles.stopNameSelected]}>
                 {item.stop.name}
               </Text>
+              {!isPast && (
+                <Text style={[styles.countdown, isSelected && styles.countdownSelected]}>
+                  {minsLeft} min
+                </Text>
+              )}
             </TouchableOpacity>
           );
         }}
@@ -143,5 +149,13 @@ const styles = StyleSheet.create({
   stopNameSelected: {
     color: '#ff711d',
     fontWeight: '700',
+  },
+  countdown: {
+    fontSize: 14,
+    color: '#888',
+    marginLeft: 8,
+  },
+  countdownSelected: {
+    color: '#ff711d',
   },
 });
