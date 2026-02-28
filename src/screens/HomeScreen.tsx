@@ -93,7 +93,12 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.appTitle}>Rongiajad</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.appTitle}>Rongiajad</Text>
+          <TouchableOpacity style={styles.infoBtn} onPress={() => navigation.navigate('About')}>
+            <Text style={styles.infoBtnText}>ℹ</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.searchBtn} onPress={() => navigation.navigate('Search')}>
           <Text style={styles.searchText}>Otsi peatusi ja liine</Text>
         </TouchableOpacity>
@@ -343,11 +348,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   appTitle: {
     color: '#fff',
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 8,
+  },
+  infoBtn: {
+    padding: 4,
+  },
+  infoBtnText: {
+    color: '#fff',
+    fontSize: 22,
+    lineHeight: 26,
   },
   searchBtn: {
     backgroundColor: 'rgba(0,0,0,0.15)',

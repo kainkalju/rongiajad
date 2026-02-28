@@ -4,4 +4,5 @@ export type RootStackParamList = {
   Stop: { stopIdx: number; directionId?: number };
   Line: { routeIdx: number; stopIdx?: number };
   SelectedLine: { tripIdx: number; stopIdx: number };
+  About: undefined;
 };

@@ -8,6 +8,7 @@ import SearchScreen from '../screens/SearchScreen';
 import StopScreen from '../screens/StopScreen';
 import LineScreen from '../screens/LineScreen';
 import SelectedLineScreen from '../screens/SelectedLineScreen';
+import AboutScreen from '../screens/AboutScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -27,6 +28,7 @@ export default function Navigation() {
         <Stack.Screen name="Stop" component={StopScreen} />
         <Stack.Screen name="Line" component={LineScreen} />
         <Stack.Screen name="SelectedLine" component={SelectedLineScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
