@@ -217,7 +217,7 @@ export function getLineTimetableAtStop(
     .sort((a, b) => a - b)
     .map(hour => ({
       hour,
-      minutes: minutesByHour[hour].sort((a, b) => a - b),
+      minutes: [...new Set(minutesByHour[hour])].sort((a, b) => a - b),
     }));
 }
 
