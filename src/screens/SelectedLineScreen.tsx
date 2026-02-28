@@ -54,7 +54,7 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backIcon}>‹</Text>
+          <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
         <TouchableOpacity
@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 12,
   },
-  backBtn: { marginRight: 8 },
-  backIcon: { color: '#fff', fontSize: 28, fontWeight: '300', lineHeight: 30 },
+  backBtn: { marginRight: 4, padding: 8 },
+  backIcon: { color: '#fff', fontSize: 26, fontWeight: '400', lineHeight: 28 },
   title: { flex: 1, color: '#fff', fontSize: 17, fontWeight: '700' },
   starIcon: { color: '#fff', fontSize: 22, marginLeft: 8 },
   row: {

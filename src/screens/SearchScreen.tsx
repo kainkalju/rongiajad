@@ -55,7 +55,7 @@ export default function SearchScreen({ navigation }: Props) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backIcon}>‹</Text>
+          <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <SearchBar
           value={query}
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  backBtn: { marginRight: 8 },
-  backIcon: { color: '#fff', fontSize: 28, fontWeight: '300', lineHeight: 30 },
+  backBtn: { marginRight: 4, padding: 8 },
+  backIcon: { color: '#fff', fontSize: 26, fontWeight: '400', lineHeight: 28 },
   sectionHeader: {
     backgroundColor: '#f5f5f5',
     paddingHorizontal: 16,

@@ -62,7 +62,7 @@ export default function StopScreen({ route, navigation }: Props) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backIcon}>‹</Text>
+          <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.stopName} numberOfLines={1}>{stop.name}</Text>
         <TouchableOpacity
@@ -231,8 +231,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 12,
   },
-  backBtn: { marginRight: 8 },
-  backIcon: { color: '#fff', fontSize: 28, fontWeight: '300', lineHeight: 30 },
+  backBtn: { marginRight: 4, padding: 8 },
+  backIcon: { color: '#fff', fontSize: 26, fontWeight: '400', lineHeight: 28 },
   stopName: {
     flex: 1,
     color: '#fff',
