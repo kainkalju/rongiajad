@@ -132,7 +132,7 @@ export default function HomeScreen({ navigation }: Props) {
           nowMinutes={nowMinutes}
           onRefresh={requestLocation}
           onStopPress={stopIdx => navigation.navigate('Stop', { stopIdx })}
-        onDeparturePress={(tripIdx, sIdx) => navigation.navigate('CurrentLine', { tripIdx, stopIdx: sIdx })}
+        onDeparturePress={(tripIdx, sIdx) => navigation.navigate('SelectedLine', { tripIdx, stopIdx: sIdx })}
         />
       ) : (
         <LemmikudTab

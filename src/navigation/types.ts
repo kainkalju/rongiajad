@@ -3,5 +3,5 @@ export type RootStackParamList = {
   Search: undefined;
   Stop: { stopIdx: number };
   Line: { routeIdx: number; stopIdx?: number };
-  CurrentLine: { tripIdx: number; stopIdx: number };
+  SelectedLine: { tripIdx: number; stopIdx: number };
 };

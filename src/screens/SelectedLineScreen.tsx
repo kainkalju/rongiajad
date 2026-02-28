@@ -15,9 +15,9 @@ import type { GtfsData } from '../data/types';
 
 const gtfs = gtfsRaw as unknown as GtfsData;
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CurrentLine'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'SelectedLine'>;
 
-export default function CurrentLineScreen({ route, navigation }: Props) {
+export default function SelectedLineScreen({ route, navigation }: Props) {
   const { tripIdx, stopIdx } = route.params;
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList>(null);

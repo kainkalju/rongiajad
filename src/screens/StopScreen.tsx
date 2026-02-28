@@ -100,7 +100,7 @@ export default function StopScreen({ route, navigation }: Props) {
           tomorrowDeps={tomorrowDeps}
           nowMinutes={nowMinutes}
           stopIdx={stopIdx}
-          onDeparturePress={tripIdx => navigation.navigate('CurrentLine', { tripIdx, stopIdx })}
+          onDeparturePress={tripIdx => navigation.navigate('SelectedLine', { tripIdx, stopIdx })}
         />
       ) : (
         <LinesList
