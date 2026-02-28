@@ -7,7 +7,7 @@ Mobile application - Elron train schedule based on user location
 **Framework:** React Native with Expo (cross-platform, iOS + Android)
 
 **Key principles:**
-- Offline-first: all schedule data is bundled with the app, no network required
+- Offline-first: all schedule data is bundled with the app; optional runtime update downloads fresh data
 - GPS-based nearest stop detection using device location services
 - Language: Estonian (UI strings in Estonian)
 
@@ -17,9 +17,9 @@ rongiajad/
   elron/          # Bundled GTFS data files (static, updated per release)
   screenshots/    # UI reference designs
   src/
-    screens/      # HomeScreen, SearchScreen, StopScreen, LineScreen, SelectedLineScreen
+    screens/      # HomeScreen, SearchScreen, StopScreen, LineScreen, SelectedLineScreen, AboutScreen
     components/   # DepartureRow, StopList, TimetableGrid, SearchBar
-    data/         # GTFS parser and query helpers
+    data/         # GTFS parser, query helpers, runtime update pipeline
     store/        # App state (favourites, last location)
 ```
 
@@ -29,10 +29,19 @@ rongiajad/
 - Stop detail (tabs: Now / Lines)
 - Line detail (tabs: Weekday / Saturday / Sunday)
 - Selected line — full stop sequence for a specific trip, with the origin stop highlighted; tapping any stop navigates to Stop detail filtered to the same direction
+- About — app info, data source credit, runtime GTFS update button
 
 **State management:** Zustand for favourites and current location. Favourites (`favStops`, `favRoutes`) are persisted across restarts via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state is intentionally not persisted.
 
 **Location:** `expo-location` for GPS; find nearest stop by haversine distance to `stops.txt` coordinates
+
+**Runtime GTFS update pipeline** (`src/data/`):
+- `buildGtfs.ts` — in-memory CSV parser; filters to Elron (`agency_id = '10520953'`) then builds the same compact `GtfsData` structure as the build-time script
+- `gtfsLoader.ts` — called at app startup; reads `gtfs.json` from device document directory (if present) and calls `initGtfs()` to hot-swap bundled data
+- `gtfsUpdater.ts` — full update pipeline: HEAD check (`checkGtfsUpdateAvailable`), download → unzip (JSZip) → process → save; progress callbacks drive the About screen UI
+- `parser.ts` — `gtfs` ref is now mutable; `initGtfs(data)` replaces it at runtime; all query functions automatically see the new data
+- Download source: `https://eu-gtfs.remix.com/elron.zip`
+- Update timestamp stored in `AsyncStorage` under key `gtfs_updated_at` (ISO string)
 
 ---
 
@@ -82,6 +91,7 @@ Brand colour: `#ff711d` (Elron orange). White text on orange surfaces.
 | `selected-line-list-of-stops.webp` | Line — stop list | Header: back, line name ("Tallinn – Tartu (ekspress)"), location pin. Vertical dashed timeline on left; stop names listed in sequence. |
 | `selected-line-departure-times.webp` | Line — timetable | Header: back, route name ("Tartu – Tallinn"), stop name subtitle ("Kaarepere"), favourite star. Day-type tabs: **Tööpäev** / **Laupäev** / **Pühapäev**. Two-column grid: bold hour on left, minutes on right. Current hour highlighted in orange. |
 | `att.GDRL1u2Un3CevuZo7HBC3_JJoPlXf5cmie3lmQnxS2A.png.JPEG` | Selected line — trip stops | Orange header: back arrow, title format `{shortName} - {originStop} - {terminalStop}` (e.g. "R15 - Tallinn - Paldiski"), favourite star (☆/★). Flat list of all stops in trip order: departure time on the left, stop name on the right. Currently selected stop highlighted in orange. Tapping a stop navigates to StopScreen filtered to the same direction. Screen navigated to by tapping a departure row. |
+| *(About screen)* | About / Teave | Grey background, orange header with back arrow. Info rows: version, co-author, disclaimer, inspiration, data source (https://peatus.ee/content/teenusest), last-updated date. Bottom section: checks remote Last-Modified on mount → shows "Kontrollin uuendusi..." spinner → "Sõiduplaanid on ajakohased" (green) or "Uuenda sõiduplaane" button (orange). During update: button shows spinner, step labels cycle in Estonian, downloaded KB shown. On error: red message + retry button. |
 
 **Component patterns:**
 - Departure row: `[train icon] [bold time range]  [route label]  [countdown bold right]`
