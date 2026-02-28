@@ -109,3 +109,7 @@ This app is an independent project and is not affiliated with Elron AS. The deve
 ---
 
 *Co-authored with Claude Sonnet 4.6*
+
+---
+
+MIT License — see [LICENSE](LICENSE)
