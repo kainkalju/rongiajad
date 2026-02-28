@@ -284,6 +284,15 @@ export function getRouteDirectionsAtStop(stopIdx: number): { route: Route; direc
 }
 
 // ---------------------------------------------------------------------------
+// All stops with times for a specific trip
+// ---------------------------------------------------------------------------
+
+export function getStopsWithTimesForTrip(tripIdx: number): { stop: Stop; dep: string }[] {
+  const stopTimes = gtfs.stopTimesByTrip[tripIdx] ?? [];
+  return stopTimes.map(([sIdx, , dep]) => ({ stop: getStop(sIdx), dep }));
+}
+
+// ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------
 

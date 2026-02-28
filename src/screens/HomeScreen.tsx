@@ -132,6 +132,7 @@ export default function HomeScreen({ navigation }: Props) {
           nowMinutes={nowMinutes}
           onRefresh={requestLocation}
           onStopPress={stopIdx => navigation.navigate('Stop', { stopIdx })}
+        onDeparturePress={(tripIdx, sIdx) => navigation.navigate('CurrentLine', { tripIdx, stopIdx: sIdx })}
         />
       ) : (
         <LemmikudTab
@@ -158,6 +159,7 @@ function GraafikTab({
   nowMinutes,
   onRefresh,
   onStopPress,
+  onDeparturePress,
 }: {
   loading: boolean;
   locationError: string | null;
@@ -169,6 +171,7 @@ function GraafikTab({
   nowMinutes: number;
   onRefresh: () => void;
   onStopPress: (idx: number) => void;
+  onDeparturePress: (tripIdx: number, stopIdx: number) => void;
 }) {
   if (loading) {
     return (
@@ -251,7 +254,13 @@ function GraafikTab({
             </View>
           );
         }
-        return <DepartureRow departure={item.dep} nowMinutes={item.isTomorrow ? nowMinutes - 1440 : nowMinutes} />;
+        return (
+          <DepartureRow
+            departure={item.dep}
+            nowMinutes={item.isTomorrow ? nowMinutes - 1440 : nowMinutes}
+            onPress={() => activeStopIdx !== null && onDeparturePress(item.dep.tripIdx, activeStopIdx)}
+          />
+        );
       }}
       ListEmptyComponent={
         <View style={styles.centered}>

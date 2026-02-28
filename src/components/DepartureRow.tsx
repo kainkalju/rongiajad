@@ -1,14 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import type { Departure } from '../data/types';
 import { minutesToHHMM, timeToMinutes } from '../data/parser';
 
 type Props = {
   departure: Departure;
   nowMinutes: number;
+  onPress?: () => void;
 };
 
-export default function DepartureRow({ departure, nowMinutes }: Props) {
+export default function DepartureRow({ departure, nowMinutes, onPress }: Props) {
   const { dep, depMinutes, route, originStop, terminalStop } = departure;
   const countdown = depMinutes - nowMinutes;
   const countdownLabel =
@@ -18,7 +19,7 @@ export default function DepartureRow({ departure, nowMinutes }: Props) {
   const routeLabel = `${originStop} → ${terminalStop}`;
 
   return (
-    <View style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
       <Text style={styles.trainIcon}>🚂</Text>
       <View style={styles.middle}>
         <Text style={styles.time}>{timeLabel}</Text>
@@ -27,7 +28,7 @@ export default function DepartureRow({ departure, nowMinutes }: Props) {
         </Text>
       </View>
       <Text style={styles.countdown}>{countdownLabel}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 

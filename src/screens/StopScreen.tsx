@@ -99,6 +99,8 @@ export default function StopScreen({ route, navigation }: Props) {
           todayDeps={todayDeps}
           tomorrowDeps={tomorrowDeps}
           nowMinutes={nowMinutes}
+          stopIdx={stopIdx}
+          onDeparturePress={tripIdx => navigation.navigate('CurrentLine', { tripIdx, stopIdx })}
         />
       ) : (
         <LinesList
@@ -117,10 +119,14 @@ function DeparturesList({
   todayDeps,
   tomorrowDeps,
   nowMinutes,
+  stopIdx,
+  onDeparturePress,
 }: {
   todayDeps: Departure[];
   tomorrowDeps: Departure[];
   nowMinutes: number;
+  stopIdx: number;
+  onDeparturePress: (tripIdx: number) => void;
 }) {
   type Row =
     | { type: 'today-header' }
@@ -170,7 +176,13 @@ function DeparturesList({
             </View>
           );
         }
-        return <DepartureRow departure={item.dep} nowMinutes={item.isTomorrow ? nowMinutes - 1440 : nowMinutes} />;
+        return (
+          <DepartureRow
+            departure={item.dep}
+            nowMinutes={item.isTomorrow ? nowMinutes - 1440 : nowMinutes}
+            onPress={() => onDeparturePress(item.dep.tripIdx)}
+          />
+        );
       }}
     />
   );
