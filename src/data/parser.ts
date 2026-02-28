@@ -1,7 +1,11 @@
 import gtfsRaw from './gtfs.json';
 import type { GtfsData, Stop, Route, Departure, TimetableEntry, DayType } from './types';
 
-const gtfs = gtfsRaw as unknown as GtfsData;
+let gtfs: GtfsData = gtfsRaw as unknown as GtfsData;
+
+export function initGtfs(data: GtfsData): void {
+  gtfs = data;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
