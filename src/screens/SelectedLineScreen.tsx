@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { getStopsWithTimesForTrip, getRoute, minutesToHHMM, timeToMinutes } from '../data/parser';
+import { useStore } from '../store';
 import gtfsRaw from '../data/gtfs.json';
 import type { GtfsData } from '../data/types';
 
@@ -24,6 +25,8 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
 
   const trip = gtfs.trips[tripIdx];
   const lineRoute = trip ? getRoute(trip[0]) : null;
+  const { isFavRoute, addFavRoute, removeFavRoute } = useStore();
+  const isFav = lineRoute ? isFavRoute(lineRoute.idx) : false;
   const stopItems = getStopsWithTimesForTrip(tripIdx);
 
   const originStop = stopItems[0]?.stop.name ?? '';
@@ -51,7 +54,12 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
           <Text style={styles.backIcon}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
-        <Text style={styles.pinIcon}>📍</Text>
+        <TouchableOpacity
+          onPress={() => lineRoute && (isFav ? removeFavRoute(lineRoute.idx) : addFavRoute(lineRoute))}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Text style={styles.starIcon}>{isFav ? '★' : '☆'}</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -94,7 +102,7 @@ const styles = StyleSheet.create({
   backBtn: { marginRight: 8 },
   backIcon: { color: '#fff', fontSize: 28, fontWeight: '300', lineHeight: 30 },
   title: { flex: 1, color: '#fff', fontSize: 17, fontWeight: '700' },
-  pinIcon: { fontSize: 20, marginLeft: 8 },
+  starIcon: { color: '#fff', fontSize: 22, marginLeft: 8 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
