@@ -64,14 +64,17 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
           const depMins = timeToMinutes(item.dep);
           const timeLabel = minutesToHHMM(depMins);
           return (
-            <View style={[styles.row, isSelected && styles.rowSelected]}>
+            <TouchableOpacity
+              style={[styles.row, isSelected && styles.rowSelected]}
+              onPress={() => navigation.navigate('Stop', { stopIdx: item.stop.idx, directionId: trip[2] })}
+            >
               <Text style={[styles.time, isSelected && styles.timeSelected]}>
                 {timeLabel}
               </Text>
               <Text style={[styles.stopName, isSelected && styles.stopNameSelected]}>
                 {item.stop.name}
               </Text>
-            </View>
+            </TouchableOpacity>
           );
         }}
       />

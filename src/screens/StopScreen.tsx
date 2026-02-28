@@ -24,7 +24,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Stop'>;
 type Tab = 'praegu' | 'liinid';
 
 export default function StopScreen({ route, navigation }: Props) {
-  const { stopIdx } = route.params;
+  const { stopIdx, directionId } = route.params;
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<Tab>('praegu');
   const [now, setNow] = useState(new Date());
@@ -38,7 +38,7 @@ export default function StopScreen({ route, navigation }: Props) {
   useEffect(() => {
     const currentNow = new Date();
     setNow(currentNow);
-    const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30);
+    const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId);
     setTodayDeps(today);
     setTomorrowDeps(tomorrow);
   }, [stopIdx]);
@@ -47,7 +47,7 @@ export default function StopScreen({ route, navigation }: Props) {
     const timer = setInterval(() => {
       const currentNow = new Date();
       setNow(currentNow);
-      const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30);
+      const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId);
       setTodayDeps(today);
       setTomorrowDeps(tomorrow);
     }, 60_000);

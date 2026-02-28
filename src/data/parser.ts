@@ -137,7 +137,8 @@ function buildDeparture(
 export function getUpcomingDepartures(
   stopIdx: number,
   now: Date,
-  limit = 20
+  limit = 20,
+  directionId?: number
 ): { today: Departure[]; tomorrow: Departure[] } {
   const todayNum = dateToYYYYMMDD(now);
   const todayJSDay = now.getDay();
@@ -156,6 +157,7 @@ export function getUpcomingDepartures(
   for (const [tripIdx, , dep] of stopTimes) {
     const trip = gtfs.trips[tripIdx];
     if (!trip) continue;
+    if (directionId !== undefined && trip[2] !== directionId) continue;
     const serviceIdx = trip[1];
 
     const depMins = timeToMinutes(dep);
