@@ -34,19 +34,37 @@ export default function LineScreen({ route, navigation }: Props) {
 
   const [view, setView] = useState<View_>(stopIdx !== undefined ? 'ajad' : 'peatused');
   const [dayType, setDayType] = useState<DayType>('weekday');
+  const [directionId, setDirectionId] = useState<0 | 1>(0);
 
-  // Stop list for direction 0
+  // Stop lists per direction
   const stops0 = getStopsForRoute(routeIdx, 0);
   const stops1 = getStopsForRoute(routeIdx, 1);
+  const hasMultipleDirections = stops0.length > 0 && stops1.length > 0;
+
+  // For "Peatused" tab always show canonical direction
   const allStops = stops0.length > 0 ? stops0 : stops1;
 
-  const focusedStopIdx = stopIdx ?? allStops[0]?.idx;
+  // For "Ajad" tab use direction-specific stops
+  const dirStops = directionId === 0
+    ? (stops0.length > 0 ? stops0 : stops1)
+    : (stops1.length > 0 ? stops1 : stops0);
+
+  const focusedStopIdx = (() => {
+    if (stopIdx !== undefined && dirStops.some(s => s.idx === stopIdx)) return stopIdx;
+    return dirStops[0]?.idx;
+  })();
   const focusedStop = focusedStopIdx !== undefined ? getStop(focusedStopIdx) : null;
 
   const timetableEntries =
     focusedStopIdx !== undefined
-      ? getLineTimetableAtStop(focusedStopIdx, routeIdx, dayType)
+      ? getLineTimetableAtStop(focusedStopIdx, routeIdx, dayType, directionId)
       : [];
+
+  const dirLabel = (() => {
+    const from = dirStops[0]?.name ?? '';
+    const to = dirStops[dirStops.length - 1]?.name ?? '';
+    return `${from} → ${to}`;
+  })();
 
   const now = new Date();
   const currentHour = now.getHours();
@@ -119,9 +137,17 @@ export default function LineScreen({ route, navigation }: Props) {
             })}
           </View>
 
-          {/* Stop selector — horizontal scroll through all stops */}
+          {/* Direction toggle */}
+          {hasMultipleDirections && (
+            <TouchableOpacity style={styles.directionRow} onPress={() => setDirectionId(d => d === 0 ? 1 : 0)}>
+              <Text style={styles.directionLabel} numberOfLines={1}>{dirLabel}</Text>
+              <Text style={styles.directionIcon}>⇄</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Stop selector — horizontal scroll through direction stops */}
           <FlatList
-            data={allStops}
+            data={dirStops}
             keyExtractor={s => String(s.idx)}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -222,4 +248,15 @@ const styles = StyleSheet.create({
   stopPillActive: { backgroundColor: '#ff711d' },
   stopPillText: { fontSize: 13, color: '#555' },
   stopPillTextActive: { color: '#fff', fontWeight: '600' },
+  directionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e5e5e5',
+  },
+  directionLabel: { flex: 1, fontSize: 13, color: '#333', fontWeight: '500' },
+  directionIcon: { fontSize: 18, color: '#ff711d', marginLeft: 8 },
 });

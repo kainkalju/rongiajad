@@ -196,7 +196,8 @@ export function getUpcomingDepartures(
 export function getLineTimetableAtStop(
   stopIdx: number,
   routeIdx: number,
-  dayType: DayType
+  dayType: DayType,
+  directionId?: 0 | 1
 ): TimetableEntry[] {
   const stopTimes = gtfs.stopTimesByStop[stopIdx] ?? [];
   const minutesByHour: Record<number, number[]> = {};
@@ -204,8 +205,9 @@ export function getLineTimetableAtStop(
   for (const [tripIdx, , dep] of stopTimes) {
     const trip = gtfs.trips[tripIdx];
     if (!trip) continue;
-    const [tRouteIdx, serviceIdx] = trip;
+    const [tRouteIdx, serviceIdx, tDirectionId] = trip;
     if (tRouteIdx !== routeIdx) continue;
+    if (directionId !== undefined && tDirectionId !== directionId) continue;
 
     if (!isServiceOfDayType(serviceIdx, dayType)) continue;
 
