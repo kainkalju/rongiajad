@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -37,8 +37,18 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
 
   const selectedIndex = stopItems.findIndex(s => s.stop.idx === stopIdx);
 
-  const now = new Date();
-  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const [nowMins, setNowMins] = useState(() => {
+    const n = new Date();
+    return n.getHours() * 60 + n.getMinutes();
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const n = new Date();
+      setNowMins(n.getHours() * 60 + n.getMinutes());
+    }, 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Scroll to selected stop after layout
   useEffect(() => {
