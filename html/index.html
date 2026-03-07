@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rongiajad — Support</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    header {
+      background: #ff711d;
+      color: white;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    section {
+      margin-bottom: 56px;
+    }
+
+    section h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1d1d1f;
+    }
+
+    section p {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #3a3a3c;
+    }
+
+    .screenshots {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+    }
+
+    .screenshots img {
+      height: 420px;
+      width: auto;
+      border-radius: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ff711d;
+    }
+
+    .feature-card p {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #3a3a3c;
+    }
+
+    .contact-box {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .contact-box p {
+      margin-bottom: 16px;
+    }
+
+    .contact-box a {
+      display: inline-block;
+      background: #ff711d;
+      color: white;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 980px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .contact-box a:hover {
+      background: #e5641a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.85rem;
+      color: #8e8e93;
+      border-top: 1px solid #e5e5ea;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Rongiajad</h1>
+  <p>Elroni rongiplaanid — kiirelt, otse telefonis.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>Screenshots</h2>
+    <div class="screenshots">
+      <img src="Screenshot7.png" alt="Home screen with favourites">
+      <img src="Screenshot1.png" alt="Home screen with schedule">
+      <img src="Screenshot2.png" alt="Search screen">
+      <img src="Screenshot3.png" alt="Stop departures">
+      <img src="Screenshot5.png" alt="Stop lines tab">
+      <img src="Screenshot4.png" alt="Trip stop sequence">
+      <img src="Screenshot6.png" alt="Line timetable">
+    </div>
+  </section>
+
+  <section>
+    <h2>Features</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>GPS-based nearest stop</h3>
+        <p>The app automatically detects your location and shows upcoming departures from the nearest train stop.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Full Elron timetable</h3>
+        <p>Browse weekday, Saturday, and Sunday schedules for all Elron lines across Estonia.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Search stops and lines</h3>
+        <p>Quickly find any stop or line by name. Results show all routes serving that stop.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Favourites</h3>
+        <p>Save your most-used stops and lines for instant access from the home screen.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Trip stop sequence</h3>
+        <p>Tap any departure to see the full list of stops with times. Your current stop is highlighted.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Works offline</h3>
+        <p>All schedule data is bundled with the app. No internet connection needed to view timetables.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Support</h2>
+    <div class="contact-box">
+      <p>If you have a question, found a bug, or have a feature request, please open an issue on GitHub.</p>
+      <a href="https://github.com/kainkordian/rongiajad/issues">Open an issue on GitHub</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  &copy; 2026 FlyCom. Schedule data from <a href="https://peatus.ee/content/teenusest" style="color:#ff711d;">peatus.ee</a> / Elron.
+</footer>
+
+</body>
+</html>
