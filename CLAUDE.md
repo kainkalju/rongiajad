@@ -14,34 +14,142 @@ Mobile application - Elron train schedule based on user location
 **Project structure:**
 ```
 rongiajad/
-  elron/          # Bundled GTFS data files (static, updated per release)
-  screenshots/    # UI reference designs
+  elron/               # Bundled GTFS source files (routes, stops, trips, calendar…)
+  scripts/
+    build-data.js      # CLI: GTFS CSV → src/data/gtfs.json  (run: npm run build-data)
   src/
-    screens/      # HomeScreen, SearchScreen, StopScreen, LineScreen, SelectedLineScreen, AboutScreen
-    components/   # DepartureRow, StopList, TimetableGrid, SearchBar
-    data/         # GTFS parser, query helpers, runtime update pipeline
-    store/        # App state (favourites, last location)
+    navigation/
+      index.tsx        # Stack navigator setup (screen order, animations)
+      types.ts         # RootStackParamList — all screen param types
+    screens/
+      HomeScreen.tsx        # Nearest stops + departures + favourites
+      SearchScreen.tsx      # Modal search (stops & routes)
+      StopScreen.tsx        # Single stop: Praegu tab + Liinid tab
+      LineScreen.tsx        # Route detail: stop timeline + timetable grid
+      SelectedLineScreen.tsx# Single trip: all stops with times
+      AboutScreen.tsx       # App info + GTFS update UI
+    components/
+      DepartureRow.tsx  # Departure list item (time, route, countdown)
+      RouteChip.tsx     # Orange pill badge (origin → terminal)
+      SearchBar.tsx     # Orange search input with clear button
+      StopTimeline.tsx  # Vertical dashed stop list (LineScreen)
+      TimetableGrid.tsx # Hour × minutes grid (LineScreen)
+    data/
+      types.ts          # GtfsData, Stop, Route, Departure, TimetableEntry, DayType
+      parser.ts         # All query functions + time helpers (primary data interface)
+      gtfs.json         # Pre-built data bundle (~1 MB, bundled at build time)
+      gtfsLoader.ts     # App startup: load saved gtfs.json from device storage
+      gtfsUpdater.ts    # Runtime update pipeline: download → unzip → process → save
+      buildGtfs.ts      # In-memory CSV parser (used by updater, mirrors build-data.js)
+    store/
+      index.ts          # Zustand store: location, favStops, favRoutes
 ```
 
-**Navigation:** Stack navigator (React Navigation)
-- Home (tabs: Favourites / Schedule / Map)
-- Search (modal overlay)
-- Stop detail (tabs: Now / Lines)
-- Line detail (tabs: Weekday / Saturday / Sunday)
-- Selected line — full stop sequence for a specific trip, with the origin stop highlighted; tapping any stop navigates to Stop detail filtered to the same direction
-- About — app info, data source credit, runtime GTFS update button
+**Navigation:** Native stack (React Navigation), no header chrome (custom headers in each screen)
+- `Home` — tabs: **Lemmikud** (Favourites) / **Graafik** (Schedule)
+- `Search` — modal, slide from bottom
+- `Stop` — tabs: **Praegu** (Now) / **Liinid** (Lines)
+- `Line` — views: stop timeline / timetable grid; day tabs + direction toggle
+- `SelectedLine` — full stop sequence for one trip; selected stop highlighted; tap stop → `Stop`
+- `About` — app info, data source credit, runtime GTFS update button
 
-**State management:** Zustand for favourites and current location. Favourites (`favStops`, `favRoutes`) are persisted across restarts via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state is intentionally not persisted.
+**State management:** Zustand for favourites and current location. `favStops` and `favRoutes` are persisted via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state is intentionally not persisted.
 
-**Location:** `expo-location` for GPS; find nearest stop by haversine distance to `stops.txt` coordinates
+**Location:** `expo-location` for GPS; nearest stop found by haversine distance against all stops.
 
 **Runtime GTFS update pipeline** (`src/data/`):
 - `buildGtfs.ts` — in-memory CSV parser; filters to Elron (`agency_id = '10520953'`) then builds the same compact `GtfsData` structure as the build-time script
 - `gtfsLoader.ts` — called at app startup; reads `gtfs.json` from device document directory (if present) and calls `initGtfs()` to hot-swap bundled data
 - `gtfsUpdater.ts` — full update pipeline: HEAD check (`checkGtfsUpdateAvailable`), download → unzip (JSZip) → process → save; progress callbacks drive the About screen UI
-- `parser.ts` — `gtfs` ref is now mutable; `initGtfs(data)` replaces it at runtime; all query functions automatically see the new data
+- `parser.ts` — `gtfs` ref is mutable; `initGtfs(data)` replaces it at runtime; all query functions automatically see the new data
 - Download source: `https://eu-gtfs.remix.com/elron.zip`
 - Update timestamp stored in `AsyncStorage` under key `gtfs_updated_at` (ISO string)
+
+---
+
+## File Navigation Guide
+
+Quick-reference for locating code when making fixes or changes.
+
+### Screens
+
+| What to change | File |
+|---|---|
+| Home screen layout, GPS stop picker, refresh logic | `src/screens/HomeScreen.tsx` |
+| Favourite stops/routes list on home | `src/screens/HomeScreen.tsx` — `LemmikudTab` component |
+| Search results (stops section, routes section) | `src/screens/SearchScreen.tsx` |
+| Stop departure list ("Praegu" tab) | `src/screens/StopScreen.tsx` — `DeparturesList` component |
+| Routes at a stop ("Liinid" tab) | `src/screens/StopScreen.tsx` — `LinesList` component |
+| Route stop timeline (vertical list) | `src/screens/LineScreen.tsx` + `src/components/StopTimeline.tsx` |
+| Route timetable grid (hours × minutes) | `src/screens/LineScreen.tsx` + `src/components/TimetableGrid.tsx` |
+| Day tabs (Tööpäev / Laupäev / Pühapäev) | `src/screens/LineScreen.tsx` |
+| Direction toggle (⇄) | `src/screens/LineScreen.tsx` |
+| Single trip stop list with times | `src/screens/SelectedLineScreen.tsx` |
+| About / app info | `src/screens/AboutScreen.tsx` |
+| GTFS update UI (button, progress, error) | `src/screens/AboutScreen.tsx` |
+| Screen transitions / modal animation | `src/navigation/index.tsx` |
+| Navigation param types | `src/navigation/types.ts` |
+
+### Components
+
+| Component | File | Used in |
+|---|---|---|
+| Departure row (time + route + countdown) | `src/components/DepartureRow.tsx` | HomeScreen, StopScreen |
+| Orange route badge pill | `src/components/RouteChip.tsx` | SearchScreen |
+| Search input with clear button | `src/components/SearchBar.tsx` | SearchScreen |
+| Vertical stop timeline | `src/components/StopTimeline.tsx` | LineScreen |
+| Hour × minutes timetable grid | `src/components/TimetableGrid.tsx` | LineScreen |
+
+### Data & queries
+
+| What to change | File | Key function |
+|---|---|---|
+| Nearest stop from GPS | `src/data/parser.ts` | `getNearestStops(lat, lon, limit?)` |
+| Today's / tomorrow's departures at a stop | `src/data/parser.ts` | `getUpcomingDepartures(stopIdx, now, limit?, directionId?)` |
+| Timetable grid data by day type | `src/data/parser.ts` | `getLineTimetableAtStop(stopIdx, routeIdx, dayType, directionId?)` |
+| All stops for a route (ordered) | `src/data/parser.ts` | `getStopsForRoute(routeIdx, directionId?)` |
+| All stops + times for one trip | `src/data/parser.ts` | `getStopsWithTimesForTrip(tripIdx)` |
+| Routes serving a stop | `src/data/parser.ts` | `getRoutesAtStop(stopIdx)` |
+| Route directions at a stop | `src/data/parser.ts` | `getRouteDirectionsAtStop(stopIdx)` |
+| Search stops by name | `src/data/parser.ts` | `searchStops(query, limit?)` |
+| Search routes by name | `src/data/parser.ts` | `searchRoutes(query, limit?)` |
+| Time string → minutes | `src/data/parser.ts` | `timeToMinutes(t)` (handles ≥24:00) |
+| Minutes → "HH:MM" | `src/data/parser.ts` | `minutesToHHMM(mins)` |
+| Hot-swap GTFS data | `src/data/parser.ts` | `initGtfs(data)` |
+| Load persisted GTFS on startup | `src/data/gtfsLoader.ts` | `loadSavedGtfs()` |
+| Download + install fresh GTFS | `src/data/gtfsUpdater.ts` | `updateGtfsData(onStep, onInfo)` |
+| Check if update is available | `src/data/gtfsUpdater.ts` | `checkGtfsUpdateAvailable(localIso)` |
+| Rebuild gtfs.json from source files | `scripts/build-data.js` | `npm run build-data` |
+
+### Store
+
+| What to change | File | Relevant fields |
+|---|---|---|
+| Favourite stops (add / remove / check) | `src/store/index.ts` | `favStops`, `addFavStop`, `removeFavStop`, `isFavStop` |
+| Favourite routes (add / remove / check) | `src/store/index.ts` | `favRoutes`, `addFavRoute`, `removeFavRoute`, `isFavRoute` |
+| Current GPS location | `src/store/index.ts` | `location`, `setLocation` |
+
+### Navigation params
+
+| Screen | Params |
+|---|---|
+| `Home` | `undefined` |
+| `Search` | `undefined` |
+| `Stop` | `{ stopIdx: number; directionId?: number }` |
+| `Line` | `{ routeIdx: number; stopIdx?: number }` |
+| `SelectedLine` | `{ tripIdx: number; stopIdx: number }` |
+| `About` | `undefined` |
+
+### Types (`src/data/types.ts`)
+
+```typescript
+GtfsData   — compact integer-indexed store; all query functions read from this
+Stop       — { idx, name, lat, lon }
+Route      — { idx, shortName, longName, color }
+Departure  — { tripIdx, stopIdx, dep, depMinutes, route, headsign, tripShortName, originStop, terminalStop }
+TimetableEntry — { hour: number; minutes: number[] }
+DayType    — 'weekday' | 'saturday' | 'sunday'
+```
 
 ---
 
@@ -63,13 +171,22 @@ Source: GTFS (General Transit Feed Specification) static feed from Elron, stored
 | `shapes.txt` | Route polyline geometry for map display |
 | `feed_info.txt` | Feed version/validity metadata |
 
+**Compact data schema (gtfs.json):**
+- `stops[idx]` = `[name, lat, lon]`
+- `routes[idx]` = `[shortName, longName, color]`
+- `trips[idx]` = `[routeIdx, serviceIdx, directionId, headsign, shortName]`
+- `calendar[serviceIdx]` = `{ days (bitmask Mon=bit0…Sun=bit6), start, end }`
+- `calendarDates[serviceIdx][YYYYMMDD]` = exception type 1 (add) | 2 (remove)
+- `stopTimesByTrip[tripIdx]` = `[[stopIdx, seq, dep], ...]`
+- `stopTimesByStop[stopIdx]` = `[[tripIdx, seq, dep], ...]`
+
 **Key query patterns:**
 
-1. **Nearest stop** — haversine distance from GPS coords to every stop in `stops.txt`
-2. **Upcoming departures at a stop** — join `stop_times` → `trips` → `calendar` filtered by today's `service_id` and current time; optional `directionId` param filters to one travel direction
+1. **Nearest stop** — haversine distance from GPS coords to every stop
+2. **Upcoming departures at a stop** — join `stopTimesByStop` → `trips` → `calendar` filtered by today's service and current time; optional `directionId` param filters to one direction; `today` is unbounded, `tomorrow` capped at `limit`
 3. **Line timetable at a stop** — group departures by hour; separate tabs for Tööpäev / Laupäev / Pühapäev
-4. **Stop list for a line** — ordered `stop_times` rows for one `trip_id` (canonical trip per direction)
-5. **Search** — fuzzy match on `stop_name` and `route_short_name` / `route_long_name`
+4. **Stop list for a line** — ordered entries from `stopTimesByTrip` for one canonical trip per direction
+5. **Search** — substring match on `stop_name` and `route_short_name` / `route_long_name`
 6. **Trip stop sequence** — all stops with departure times for a single `trip_id` (`getStopsWithTimesForTrip`)
 
 **Time handling:** `stop_times` uses `HH:MM:SS` including values ≥ 24:00 for overnight trips. Parse as minutes-since-midnight for arithmetic. Timezone is always `Europe/Tallinn`.
@@ -84,18 +201,18 @@ Brand colour: `#ff711d` (Elron orange). White text on orange surfaces.
 
 | File | Screen | Description |
 |------|--------|-------------|
-| `frontpage-unknown-location.webp` | Home — no GPS | Orange header with search bar ("Otsi peatusi ja liine"). Three tabs: **Lemmikud** (Favourites), **Graafik** (Schedule), **Kaart** (Map). Empty state shows dashed-border card "+ Lisa enda lemmikpeatus ja liin". |
-| `frontpage-based-on-gps-location.webp` | Home — GPS active | Favourites tab populated via GPS: train icon + nearest station name ("Tartu rongijaam") + pagination dots for multiple stations. Departure rows show bold time range (`15:16 – 17:18`), route label (`Tartu → Tallinn (ekspress)`), and countdown (`35 min`) right-aligned. Section header "Homsed väljumised" separates tomorrow's trains. |
-| `search-destination.webp` | Search | Full-screen overlay, back arrow + text input + clear (×). Results in two sections: **Peatused** (Stops) — stop name bold, matching routes shown as small orange pill chips with arrows (`Tartu → Tallinn (ekspress)`). **Liinid** (Lines) — line entries below. |
-| `selected-train-stop-departures.webp` | Stop detail | Orange header: back arrow, stop name, favourite star (☆), location pin. Sub-tabs **Praegu** (Now) / **Liinid** (Lines). Departure rows same layout as home: time range + route + countdown. Tomorrow section header below current departures. |
-| `selected-line-list-of-stops.webp` | Line — stop list | Header: back, line name ("Tallinn – Tartu (ekspress)"), location pin. Vertical dashed timeline on left; stop names listed in sequence. |
-| `selected-line-departure-times.webp` | Line — timetable | Header: back, route name ("Tartu – Tallinn"), stop name subtitle ("Kaarepere"), favourite star. Day-type tabs: **Tööpäev** / **Laupäev** / **Pühapäev**. Two-column grid: bold hour on left, minutes on right. Current hour highlighted in orange. |
-| `att.GDRL1u2Un3CevuZo7HBC3_JJoPlXf5cmie3lmQnxS2A.png.JPEG` | Selected line — trip stops | Orange header: back arrow, title format `{shortName} - {originStop} - {terminalStop}` (e.g. "R15 - Tallinn - Paldiski"), favourite star (☆/★). Flat list of all stops in trip order: departure time on the left, stop name on the right. Currently selected stop highlighted in orange. Tapping a stop navigates to StopScreen filtered to the same direction. Screen navigated to by tapping a departure row. |
-| *(About screen)* | About / Teave | Grey background, orange header with back arrow. Info rows: version, co-author, disclaimer, inspiration, data source (https://peatus.ee/content/teenusest), last-updated date. Bottom section: checks remote Last-Modified on mount → shows "Kontrollin uuendusi..." spinner → "Sõiduplaanid on ajakohased" (green) or "Uuenda sõiduplaane" button (orange). During update: button shows spinner, step labels cycle in Estonian, downloaded KB shown. On error: red message + retry button. |
+| `frontpage-unknown-location.webp` | Home — no GPS | Orange header with search bar ("Otsi peatusi ja liine"). Tabs: **Lemmikud** (Favourites), **Graafik** (Schedule). Empty state shows dashed-border card "+ Lisa enda lemmikpeatus ja liin". |
+| `frontpage-based-on-gps-location.webp` | Home — GPS active | Graafik tab: nearest station name + pagination dots for multiple stations. Departure rows show time (`15:16`), route label (`Tartu → Tallinn (ekspress)`), and countdown (`35 min`) right-aligned. Section header "Homsed väljumised" separates tomorrow's trains. |
+| `search-destination.webp` | Search | Full-screen overlay, back arrow + text input + clear (×). Results in two sections: **Peatused** (Stops) — stop name bold, matching routes shown as small orange pill chips. **Liinid** (Lines) — line entries below. |
+| `selected-train-stop-departures.webp` | Stop detail | Orange header: back arrow, stop name, favourite star (☆). Sub-tabs **Praegu** (Now) / **Liinid** (Lines). Departure rows same layout as home. Tomorrow section header below current departures. |
+| `selected-line-list-of-stops.webp` | Line — stop list | Header: back, line name ("Tallinn – Tartu (ekspress)"). Vertical dashed timeline on left; stop names listed in sequence. |
+| `selected-line-departure-times.webp` | Line — timetable | Header: back, route name, stop name subtitle, favourite star. Day-type tabs: **Tööpäev** / **Laupäev** / **Pühapäev**. Two-column grid: bold hour on left, minutes on right. Current hour highlighted in orange. |
+| `att.GDRL1u2Un3CevuZo7HBC3_JJoPlXf5cmie3lmQnxS2A.png.JPEG` | Selected line — trip stops | Orange header: back arrow, title `{shortName} - {originStop} - {terminalStop}`, favourite star. Flat list: departure time left, stop name right. Selected stop highlighted in orange. Tapping a stop → StopScreen with same direction. |
+| *(About screen)* | About / Teave | Grey background, orange header. Info rows: version, co-author, disclaimer, data source. Bottom: update check spinner → "Sõiduplaanid on ajakohased" (green) or "Uuenda sõiduplaane" button (orange). Progress labels cycle in Estonian during update. |
 
 **Component patterns:**
-- Departure row: `[train icon] [bold time range]  [route label]  [countdown bold right]`
-- Route chip: orange rounded pill, white text, `→` separator between origin and destination
+- Departure row: `[train icon] [time]  [origin → terminal]  [countdown right]`
+- Route chip: orange rounded pill, white text, `→` separator
 - Timeline: vertical dashed line with grey dots at each stop
-- Timetable grid: left column = hour (bold, orange if current), right column = space-separated minutes (grey)
+- Timetable grid: left column = hour (bold, orange if current), right column = space-separated minutes
 - Tab bar inside screens: underline indicator on active tab, same orange header background
