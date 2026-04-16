@@ -183,8 +183,8 @@ export function getUpcomingDepartures(
   tomorrowDeps.sort((a, b) => a.depMinutes - b.depMinutes);
 
   return {
-    today: todayDeps.slice(0, limit),
-    tomorrow: tomorrowDeps.slice(0, 10),
+    today: todayDeps,
+    tomorrow: tomorrowDeps.slice(0, limit),
   };
 }
 
