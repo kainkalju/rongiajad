@@ -68,6 +68,10 @@ export function getRoute(idx: number): Route {
   return { idx, shortName, longName, color };
 }
 
+export function getTrip(tripIdx: number): [number, number, number, string, string] | undefined {
+  return gtfs.trips[tripIdx] as [number, number, number, string, string] | undefined;
+}
+
 // ---------------------------------------------------------------------------
 // Haversine — returns distance in km
 // ---------------------------------------------------------------------------

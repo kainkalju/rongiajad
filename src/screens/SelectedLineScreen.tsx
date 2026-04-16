@@ -9,12 +9,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
-import { getStopsWithTimesForTrip, getRoute, minutesToHHMM, timeToMinutes } from '../data/parser';
+import { getStopsWithTimesForTrip, getRoute, getTrip, minutesToHHMM, timeToMinutes } from '../data/parser';
 import { useStore } from '../store';
-import gtfsRaw from '../data/gtfs.json';
-import type { GtfsData } from '../data/types';
-
-const gtfs = gtfsRaw as unknown as GtfsData;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectedLine'>;
 
@@ -23,7 +19,7 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList>(null);
 
-  const trip = gtfs.trips[tripIdx];
+  const trip = getTrip(tripIdx);
   const lineRoute = trip ? getRoute(trip[0]) : null;
   const { isFavRoute, addFavRoute, removeFavRoute } = useStore();
   const isFav = lineRoute ? isFavRoute(lineRoute.idx) : false;
