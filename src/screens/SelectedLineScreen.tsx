@@ -95,7 +95,7 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
               </Text>
               {!isPast && (
                 <Text style={[styles.countdown, isSelected && styles.countdownSelected]}>
-                  {minsLeft} min
+                  {minsLeft <= 0 ? 'Nüüd' : minsLeft < 60 ? `${minsLeft} min` : `${Math.floor(minsLeft / 60)}h ${minsLeft % 60}m`}
                 </Text>
               )}
             </TouchableOpacity>
