@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -55,20 +56,27 @@ export default function HomeScreen({ navigation }: Props) {
 
   const { setLocation, favStops, favRoutes } = useStore();
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     (async () => {
       try {
         const [checkedAt, updatedAt] = await AsyncStorage.multiGet([GTFS_CHECK_KEY, 'gtfs_updated_at']);
         const lastCheck = checkedAt[1] ? new Date(checkedAt[1]).getTime() : 0;
-        if (Date.now() - lastCheck < CHECK_INTERVAL_MS) return;
+        if (Date.now() - lastCheck < CHECK_INTERVAL_MS) {
+          // Within throttle window — but still clear badge if data was updated since we last set it
+          if (updateAvailable) {
+            const result = await checkGtfsUpdateAvailable(updatedAt[1]);
+            if (result !== 'available') setUpdateAvailable(false);
+          }
+          return;
+        }
         await AsyncStorage.setItem(GTFS_CHECK_KEY, new Date().toISOString());
         const result = await checkGtfsUpdateAvailable(updatedAt[1]);
-        if (result === 'available') setUpdateAvailable(true);
+        setUpdateAvailable(result === 'available');
       } catch {
         // Non-critical; ignore silently
       }
     })();
-  }, []);
+  }, [updateAvailable]));
 
   const requestLocation = useCallback(async () => {
     setLoading(true);
