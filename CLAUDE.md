@@ -216,3 +216,40 @@ Brand colour: `#ff711d` (Elron orange). White text on orange surfaces.
 - Timeline: vertical dashed line with grey dots at each stop
 - Timetable grid: left column = hour (bold, orange if current), right column = space-separated minutes
 - Tab bar inside screens: underline indicator on active tab, same orange header background
+
+---
+
+## Troubleshooting
+
+### iOS build fails: `hermes-engine` script — Node not found
+
+**Symptom:** `xcodebuild.log` contains a line like:
+```
+/opt/homebrew/Cellar/node@24/24.13.1/bin/node: No such file or directory
+Command PhaseScriptExecution failed with a nonzero exit code
+```
+
+**Cause:** `ios/.xcode.env.local` pins a hardcoded Cellar path to a specific Node patch version. When Homebrew upgrades Node (e.g. `24.13.1` → `24.14.1`), that path no longer exists.
+
+**Fix:** Update `ios/.xcode.env.local` to use the stable opt symlink instead:
+```
+export NODE_BINARY=/opt/homebrew/opt/node@24/bin/node
+```
+This symlink always points to the currently installed version and survives patch upgrades.
+
+---
+
+## Version bump checklist
+
+When releasing a new version, update **all four** of these in lockstep:
+
+| # | File | What to change |
+|---|------|----------------|
+| 1 | `package.json` | `"version"` field — source of truth (e.g. `"1.0.1"`) |
+| 2 | `app.json` | `expo.version` — controls the version Expo/EAS uses for both platforms |
+| 3 | `src/screens/AboutScreen.tsx` | Hardcoded string in the **"Rakenduse versioon"** row (`<Text style={styles.value}>x.x.x</Text>`) |
+| 4 | `ios/Rongiajad.xcodeproj/project.pbxproj` | `MARKETING_VERSION` (two occurrences — Debug and Release configs) |
+
+> `CURRENT_PROJECT_VERSION` in the pbxproj is the build number (integer); increment it alongside `MARKETING_VERSION` for App Store submissions.
+
+> Android `versionCode` / `versionName` are derived from `app.json` by Expo — no separate file to edit.
