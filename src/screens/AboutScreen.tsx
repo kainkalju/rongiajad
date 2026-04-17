@@ -95,7 +95,7 @@ export default function AboutScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
           <Text style={styles.label}>Rakenduse versioon</Text>
-          <Text style={styles.value}>1.0.1</Text>
+          <Text style={styles.value}>1.1.0</Text>
         </View>
 
         <View style={styles.divider} />
