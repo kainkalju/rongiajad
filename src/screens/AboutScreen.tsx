@@ -15,9 +15,9 @@ import { updateGtfsData, checkGtfsUpdateAvailable, type Step, type UpdateCheckRe
 
 type Props = NativeStackScreenProps<RootStackParamList, 'About'>;
 
-const BUNDLED_DATE = '12.02.2026 11:47:00';
+const BUNDLED_DATE = '17.04.2026 09:19:53';
 // Parsed as local time (Europe/Tallinn), good enough for comparison
-const BUNDLED_DATE_ISO = new Date(2026, 1, 12, 11, 47, 0).toISOString();
+const BUNDLED_DATE_ISO = new Date(2026, 3, 17, 9, 19, 53).toISOString();
 
 const STEP_LABELS: Record<Step, string> = {
   downloading: 'Laadin alla...',
