@@ -10,12 +10,17 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useStore } from '../store';
 import { getNearestStops, getUpcomingDepartures, getStop } from '../data/parser';
+import { checkGtfsUpdateAvailable } from '../data/gtfsUpdater';
 import DepartureRow from '../components/DepartureRow';
 import type { Departure, Stop } from '../data/types';
+
+const GTFS_CHECK_KEY = 'gtfs_check_at';
+const CHECK_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -32,7 +37,24 @@ export default function HomeScreen({ navigation }: Props) {
   const [tomorrowDeps, setTomorrowDeps] = useState<Departure[]>([]);
   const [activeStopIdx, setActiveStopIdx] = useState<number | null>(null);
 
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+
   const { setLocation, favStops, favRoutes } = useStore();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [checkedAt, updatedAt] = await AsyncStorage.multiGet([GTFS_CHECK_KEY, 'gtfs_updated_at']);
+        const lastCheck = checkedAt[1] ? new Date(checkedAt[1]).getTime() : 0;
+        if (Date.now() - lastCheck < CHECK_INTERVAL_MS) return;
+        await AsyncStorage.setItem(GTFS_CHECK_KEY, new Date().toISOString());
+        const result = await checkGtfsUpdateAvailable(updatedAt[1]);
+        if (result === 'available') setUpdateAvailable(true);
+      } catch {
+        // Non-critical; ignore silently
+      }
+    })();
+  }, []);
 
   const requestLocation = useCallback(async () => {
     setLoading(true);
@@ -97,6 +119,7 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.appTitle}>Rongiajad</Text>
           <TouchableOpacity style={styles.infoBtn} onPress={() => navigation.navigate('About')}>
             <Text style={styles.infoBtnText}>ℹ</Text>
+            {updateAvailable && <View style={styles.updateDot} />}
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.searchBtn} onPress={() => navigation.navigate('Search')}>
@@ -361,6 +384,15 @@ const styles = StyleSheet.create({
   },
   infoBtn: {
     padding: 4,
+  },
+  updateDot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
   },
   infoBtnText: {
     color: '#fff',
