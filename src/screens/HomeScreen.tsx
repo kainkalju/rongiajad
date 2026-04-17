@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
@@ -38,6 +39,19 @@ export default function HomeScreen({ navigation }: Props) {
   const [activeStopIdx, setActiveStopIdx] = useState<number | null>(null);
 
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!updateAvailable) return;
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+        Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [updateAvailable, blinkAnim]);
 
   const { setLocation, favStops, favRoutes } = useStore();
 
@@ -119,7 +133,7 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.appTitle}>Rongiajad</Text>
           <TouchableOpacity style={styles.infoBtn} onPress={() => navigation.navigate('About')}>
             <Text style={styles.infoBtnText}>ℹ</Text>
-            {updateAvailable && <View style={styles.updateDot} />}
+            {updateAvailable && <Animated.View style={[styles.updateDot, { opacity: blinkAnim }]} />}
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.searchBtn} onPress={() => navigation.navigate('Search')}>
