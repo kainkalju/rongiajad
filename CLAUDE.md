@@ -53,7 +53,7 @@ rongiajad/
 - `SelectedLine` — full stop sequence for one trip; selected stop highlighted; tap stop → `Stop`
 - `About` — app info, data source credit, runtime GTFS update button
 
-**State management:** Zustand for favourites and current location. `favStops` and `favRoutes` are persisted via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state is intentionally not persisted.
+**State management:** Zustand for favourites and current location. `favStops` and `favRoutes` are persisted via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state and `gtfsVersion` are intentionally not persisted. `gtfsVersion` is a counter bumped after a runtime GTFS update so that `HomeScreen` and `StopScreen` re-fetch departures immediately.
 
 **Location:** `expo-location` for GPS; nearest stop found by haversine distance against all stops.
 
@@ -105,12 +105,13 @@ Quick-reference for locating code when making fixes or changes.
 | What to change | File | Key function |
 |---|---|---|
 | Nearest stop from GPS | `src/data/parser.ts` | `getNearestStops(lat, lon, limit?)` |
-| Today's / tomorrow's departures at a stop | `src/data/parser.ts` | `getUpcomingDepartures(stopIdx, now, limit?, directionId?)` |
+| Today's / tomorrow's departures at a stop | `src/data/parser.ts` | `getUpcomingDepartures(stopIdx, now, limit?, directionId?, region?)` |
 | Timetable grid data by day type | `src/data/parser.ts` | `getLineTimetableAtStop(stopIdx, routeIdx, dayType, directionId?)` |
 | All stops for a route (ordered) | `src/data/parser.ts` | `getStopsForRoute(routeIdx, directionId?)` |
 | All stops + times for one trip | `src/data/parser.ts` | `getStopsWithTimesForTrip(tripIdx)` |
-| Routes serving a stop | `src/data/parser.ts` | `getRoutesAtStop(stopIdx)` |
+| Routes serving a stop | `src/data/parser.ts` | `getRoutesAtStop(stopIdx, region?)` |
 | Route directions at a stop | `src/data/parser.ts` | `getRouteDirectionsAtStop(stopIdx)` |
+| Route directions grouped by Elron region | `src/data/parser.ts` | `getRouteDirectionsAtStopGrouped(stopIdx)` |
 | Search stops by name | `src/data/parser.ts` | `searchStops(query, limit?)` |
 | Search routes by name | `src/data/parser.ts` | `searchRoutes(query, limit?)` |
 | Time string → minutes | `src/data/parser.ts` | `timeToMinutes(t)` (handles ≥24:00) |
@@ -125,9 +126,10 @@ Quick-reference for locating code when making fixes or changes.
 
 | What to change | File | Relevant fields |
 |---|---|---|
-| Favourite stops (add / remove / check) | `src/store/index.ts` | `favStops`, `addFavStop`, `removeFavStop`, `isFavStop` |
+| Favourite stops (add / remove / check) | `src/store/index.ts` | `favStops`, `addFavStop(stop, region?)`, `removeFavStop(stopIdx, region?)`, `isFavStop(stopIdx, region?)` |
 | Favourite routes (add / remove / check) | `src/store/index.ts` | `favRoutes`, `addFavRoute`, `removeFavRoute`, `isFavRoute` |
 | Current GPS location | `src/store/index.ts` | `location`, `setLocation` |
+| Signal screens to re-fetch after GTFS update | `src/store/index.ts` | `gtfsVersion`, `bumpGtfsVersion` |
 
 ### Navigation params
 
@@ -135,7 +137,7 @@ Quick-reference for locating code when making fixes or changes.
 |---|---|
 | `Home` | `undefined` |
 | `Search` | `undefined` |
-| `Stop` | `{ stopIdx: number; directionId?: number }` |
+| `Stop` | `{ stopIdx: number; directionId?: number; region?: string \| null }` |
 | `Line` | `{ routeIdx: number; stopIdx?: number }` |
 | `SelectedLine` | `{ tripIdx: number; stopIdx: number }` |
 | `About` | `undefined` |
@@ -175,7 +177,7 @@ Source: GTFS (General Transit Feed Specification) static feed from Elron, stored
 - `stops[idx]` = `[name, lat, lon]`
 - `routes[idx]` = `[shortName, longName, color]`
 - `trips[idx]` = `[routeIdx, serviceIdx, directionId, headsign, shortName]`
-- `calendar[serviceIdx]` = `{ days (bitmask Mon=bit0…Sun=bit6), start, end }`
+- `calendar[serviceIdx]` = `{ days (bitmask Mon=bit0…Sun=bit6), start, end, region ('Ida-Lõuna'|'Lääne'|'Edel'|null) }`
 - `calendarDates[serviceIdx][YYYYMMDD]` = exception type 1 (add) | 2 (remove)
 - `stopTimesByTrip[tripIdx]` = `[[stopIdx, seq, dep], ...]`
 - `stopTimesByStop[stopIdx]` = `[[tripIdx, seq, dep], ...]`
@@ -183,7 +185,7 @@ Source: GTFS (General Transit Feed Specification) static feed from Elron, stored
 **Key query patterns:**
 
 1. **Nearest stop** — haversine distance from GPS coords to every stop
-2. **Upcoming departures at a stop** — join `stopTimesByStop` → `trips` → `calendar` filtered by today's service and current time; optional `directionId` param filters to one direction; `today` is unbounded, `tomorrow` capped at `limit`
+2. **Upcoming departures at a stop** — join `stopTimesByStop` → `trips` → `calendar` filtered by today's service and current time; optional `directionId` param filters to one direction; optional `region` param filters to one Elron corridor; `today` is unbounded, `tomorrow` capped at `limit`
 3. **Line timetable at a stop** — group departures by hour; separate tabs for Tööpäev / Laupäev / Pühapäev
 4. **Stop list for a line** — ordered entries from `stopTimesByTrip` for one canonical trip per direction
 5. **Search** — substring match on `stop_name` and `route_short_name` / `route_long_name`
