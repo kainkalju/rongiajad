@@ -2,6 +2,14 @@ import type { GtfsData } from './types';
 
 const ELRON_AGENCY_ID = '10520953';
 
+function extractRegion(serviceId: string): string | null {
+  const s = serviceId.replace(/^_+/, '');
+  if (s.startsWith('Ida') || s.startsWith('Lõuna')) return 'Ida-Lõuna';
+  if (s.startsWith('Laane') || s.startsWith('Lääne')) return 'Lääne';
+  if (s.startsWith('Edel')) return 'Edel';
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // CSV parser — handles quoted fields (including commas inside quotes)
 // ---------------------------------------------------------------------------
@@ -119,6 +127,7 @@ export function buildGtfsData(files: Record<string, string>): GtfsData {
         | (c.sunday === '1' ? 64 : 0),
     start: parseInt(c.start_date),
     end: parseInt(c.end_date),
+    region: extractRegion(c.service_id),
   }));
 
   // ---------------------------------------------------------------------------

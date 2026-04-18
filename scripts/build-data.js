@@ -116,6 +116,14 @@ const routes = rawRoutes.map(r => [
 // Calendar: array indexed by serviceIdMap
 // Bit-packed weekdays: Mon=bit0, Tue=bit1, ..., Sun=bit6
 // ---------------------------------------------------------------------------
+function extractRegion(serviceId) {
+  const s = serviceId.replace(/^_+/, '');
+  if (s.startsWith('Ida') || s.startsWith('Lõuna')) return 'Ida-Lõuna';
+  if (s.startsWith('Laane') || s.startsWith('Lääne')) return 'Lääne';
+  if (s.startsWith('Edel')) return 'Edel';
+  return null;
+}
+
 const calendar = rawCalendar.map(c => ({
   days: (c.monday === '1' ? 1 : 0)
       | (c.tuesday === '1' ? 2 : 0)
@@ -126,6 +134,7 @@ const calendar = rawCalendar.map(c => ({
       | (c.sunday === '1' ? 64 : 0),
   start: parseInt(c.start_date),
   end: parseInt(c.end_date),
+  region: extractRegion(c.service_id),
 }));
 
 // ---------------------------------------------------------------------------

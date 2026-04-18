@@ -295,6 +295,42 @@ export function getRouteDirectionsAtStop(stopIdx: number): { route: Route; direc
   return result;
 }
 
+/**
+ * Same as getRouteDirectionsAtStop, but grouped by Elron region (Ida / Lääne / Edel).
+ * Region comes from the service_id prefix (stored on the calendar entry).
+ * A (route, directionId) pair whose trips span multiple regions gets one entry per region.
+ */
+export function getRouteDirectionsAtStopGrouped(
+  stopIdx: number
+): { region: string | null; items: { route: Route; directionId: number }[] }[] {
+  const stopTimes = gtfs.stopTimesByStop[stopIdx] ?? [];
+  const byRegion = new Map<string, { route: Route; directionId: number }[]>();
+  const seen = new Set<string>();
+
+  for (const [tripIdx] of stopTimes) {
+    const trip = gtfs.trips[tripIdx];
+    if (!trip) continue;
+    const [routeIdx, serviceIdx, directionId] = trip;
+    const region = gtfs.calendar[serviceIdx]?.region ?? null;
+    const key = `${region ?? ''}|${routeIdx}-${directionId}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const bucket = region ?? '';
+    if (!byRegion.has(bucket)) byRegion.set(bucket, []);
+    byRegion.get(bucket)!.push({ route: getRoute(routeIdx), directionId });
+  }
+
+  const order = ['Ida-Lõuna', 'Lääne', 'Edel'];
+  const groups: { region: string | null; items: { route: Route; directionId: number }[] }[] = [];
+  for (const r of order) {
+    const items = byRegion.get(r);
+    if (items && items.length) groups.push({ region: r, items });
+  }
+  const other = byRegion.get('');
+  if (other && other.length) groups.push({ region: null, items: other });
+  return groups;
+}
+
 // ---------------------------------------------------------------------------
 // All stops with times for a specific trip
 // ---------------------------------------------------------------------------

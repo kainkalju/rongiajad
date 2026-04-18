@@ -12,7 +12,7 @@ Shows upcoming Elron departures from the nearest station based on your GPS locat
 
 - **Nearest stop** — automatically detects your closest train station via GPS
 - **Upcoming departures** — shows today's and tomorrow's trains with live countdown
-- **Stop search** — search any Elron stop or line by name
+- **Stop search** — search any Elron stop or line by name; stop results group departing directions by Elron region (Ida-Lõuna, Lääne, Edel)
 - **Line timetables** — hourly grid view, separate tabs for weekdays / Saturday / Sunday
 - **Trip stop sequence** — tap any departure to see the full list of stops with times
 - **Favourites** — pin stops and lines for quick access, persisted across restarts

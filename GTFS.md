@@ -26,7 +26,7 @@ type GtfsData = {
   trips: [number, number, number, string, string][]; // [routeIdx, serviceIdx, directionId, headsign, shortName]
   stopTimesByTrip: Record<string, [number, number, string][]>; // tripIdx → [[stopIdx, seq, "HH:MM:SS"]]
   stopTimesByStop: Record<string, [number, number, string][]>; // stopIdx → [[tripIdx, seq, "HH:MM:SS"]]
-  calendar: { days: number; start: number; end: number }[];    // days = bitmask Mon=1…Sun=64
+  calendar: { days: number; start: number; end: number; region?: string | null }[]; // days = bitmask Mon=1…Sun=64; region = 'Ida-Lõuna' | 'Lääne' | 'Edel' | null
   calendarDates: Record<string, Record<string, number>>;       // serviceIdx → {YYYYMMDD: 1|2}
 };
 ```
@@ -62,7 +62,7 @@ Run with `npm run build-data`. Reads the six CSV files from `elron/` and writes 
    - `stops[]` — `[name, lat, lon]` tuples
    - `routes[]` — `[shortName, longName, color]` tuples
    - `trips[]` — `[routeIdx, serviceIdx, directionId, headsign, shortName]` tuples
-   - `calendar[]` — `{ days, start, end }` objects with bitmask weekdays and integer YYYYMMDD dates
+   - `calendar[]` — `{ days, start, end, region }` objects with bitmask weekdays, integer YYYYMMDD dates, and an Elron region label derived from the `service_id` prefix (`'Ida-Lõuna'`, `'Lääne'`, `'Edel'`, or `null`)
    - `calendarDates{}` — nested object keyed by serviceIdx then YYYYMMDD
 5. Build two inverted index maps from `stop_times.txt`:
    - `stopTimesByTrip[tripIdx]` — all stop times for one trip, sorted by sequence
@@ -191,6 +191,13 @@ const dirs = getRouteDirectionsAtStop(stopIdx);
 ```
 
 Deduplicates by `routeIdx-directionId` key. Used to show direction tabs in `StopScreen`.
+
+```typescript
+const groups = getRouteDirectionsAtStopGrouped(stopIdx);
+// Returns: [{ region: 'Ida-Lõuna' | 'Lääne' | 'Edel' | null, items: { route, directionId }[] }, ...]
+```
+
+Same data as `getRouteDirectionsAtStop`, but grouped by Elron region and ordered Ida-Lõuna → Lääne → Edel. Region is resolved via the `calendar[serviceIdx].region` field. Used by `SearchScreen` to render direction subheadings under each matching stop.
 
 ### All stops with times for a trip
 
@@ -400,7 +407,7 @@ Defines which days of the week each service pattern runs and its validity range.
 
 | Column | Used | Notes |
 |--------|------|-------|
-| `service_id` | yes | Links to `trips.txt`; remapped to integer index |
+| `service_id` | yes | Links to `trips.txt`; remapped to integer index. Prefix (`Ida,_Lõuna_`, `Laane_`, `_Edel_`) is parsed into a `region` field on the calendar entry |
 | `start_date` | yes | YYYYMMDD integer, e.g. `20260212` |
 | `end_date` | yes | YYYYMMDD integer |
 | `monday`–`sunday` | yes | `"1"` or `"0"`; packed into a bitmask (Mon=bit0…Sun=bit6) |

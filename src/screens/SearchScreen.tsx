@@ -15,7 +15,7 @@ import RouteChip from '../components/RouteChip';
 import {
   searchStops,
   searchRoutes,
-  getRouteDirectionsAtStop,
+  getRouteDirectionsAtStopGrouped,
   getStopsForRoute,
 } from '../data/parser';
 import type { Stop, Route } from '../data/types';
@@ -96,7 +96,7 @@ export default function SearchScreen({ navigation }: Props) {
             );
           }
           if (item.type === 'stop') {
-            const routeDirections = getRouteDirectionsAtStop(item.stop.idx);
+            const groups = getRouteDirectionsAtStopGrouped(item.stop.idx);
             return (
               <TouchableOpacity
                 style={styles.stopRow}
@@ -106,25 +106,32 @@ export default function SearchScreen({ navigation }: Props) {
                 }}
               >
                 <Text style={styles.stopName}>{item.stop.name}</Text>
-                <View style={styles.chips}>
-                  {routeDirections.map(({ route: r, directionId }) => {
-                    const stopList = getStopsForRoute(r.idx, directionId);
-                    const origin = stopList[0]?.name;
-                    const terminal = stopList[stopList.length - 1]?.name;
-                    return (
-                      <RouteChip
-                        key={`${r.idx}-${directionId}`}
-                        route={r}
-                        originStop={origin}
-                        terminalStop={terminal}
-                        onPress={() => {
-                          Keyboard.dismiss();
-                          navigation.replace('Line', { routeIdx: r.idx, stopIdx: item.stop.idx });
-                        }}
-                      />
-                    );
-                  })}
-                </View>
+                {groups.map((group, gi) => (
+                  <View key={`${group.region ?? 'other'}-${gi}`} style={styles.regionGroup}>
+                    {group.region && (
+                      <Text style={styles.regionLabel}>{group.region} suund</Text>
+                    )}
+                    <View style={styles.chips}>
+                      {group.items.map(({ route: r, directionId }) => {
+                        const stopList = getStopsForRoute(r.idx, directionId as 0 | 1);
+                        const origin = stopList[0]?.name;
+                        const terminal = stopList[stopList.length - 1]?.name;
+                        return (
+                          <RouteChip
+                            key={`${r.idx}-${directionId}`}
+                            route={r}
+                            originStop={origin}
+                            terminalStop={terminal}
+                            onPress={() => {
+                              Keyboard.dismiss();
+                              navigation.replace('Line', { routeIdx: r.idx, stopIdx: item.stop.idx });
+                            }}
+                          />
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))}
               </TouchableOpacity>
             );
           }
@@ -193,6 +200,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e5e5',
   },
   stopName: { fontSize: 16, fontWeight: '700', color: '#111' },
+  regionGroup: { marginTop: 8 },
+  regionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#888',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
   chips: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
   routeRow: {
     flexDirection: 'row',

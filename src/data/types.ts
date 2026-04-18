@@ -13,7 +13,7 @@ export type GtfsData = {
   trips: [number, number, number, string, string][]; // [routeIdx, serviceIdx, dirIdx, headsign, shortName]
   stopTimesByTrip: Record<string, [number, number, string][]>; // tripIdx → [[stopIdx, seq, dep]]
   stopTimesByStop: Record<string, [number, number, string][]>; // stopIdx → [[tripIdx, seq, dep]]
-  calendar: { days: number; start: number; end: number }[];
+  calendar: { days: number; start: number; end: number; region?: string | null }[];
   calendarDates: Record<string, Record<string, number>>;
 };
 
