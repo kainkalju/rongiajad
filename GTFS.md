@@ -98,7 +98,7 @@ await updateGtfsData(
 2. **unzipping** — reads the ZIP as base64, passes to JSZip, extracts the six needed `.txt` files as strings
 3. **processing** — calls `buildGtfsData(files)` from `buildGtfs.ts`; returns a `GtfsData` object
 4. **saving** — writes `gtfs.json` to device document directory; stores current timestamp in AsyncStorage under key `gtfs_updated_at`
-5. **done** — calls `initGtfs(data)` to hot-swap the in-memory reference; all query functions immediately see the new data
+5. **done** — calls `initGtfs(data)` to hot-swap the in-memory reference; all query functions immediately see the new data. `AboutScreen` then calls `bumpGtfsVersion()` on the Zustand store, which triggers `HomeScreen` and `StopScreen` to re-fetch departures immediately via their `useEffect` deps.
 
 The ZIP file is deleted on completion (or on error) to free disk space.
 
@@ -140,7 +140,7 @@ Iterates all stops, computes haversine distance in km, sorts ascending, slices t
 ### Departures at a stop
 
 ```typescript
-const { today, tomorrow } = getUpcomingDepartures(stopIdx, new Date(), 20, directionId?);
+const { today, tomorrow } = getUpcomingDepartures(stopIdx, new Date(), 20, directionId?, region?);
 ```
 
 - Iterates `stopTimesByStop[stopIdx]`
@@ -148,6 +148,7 @@ const { today, tomorrow } = getUpcomingDepartures(stopIdx, new Date(), 20, direc
 - Today: only departures where `depMinutes >= nowMins`
 - Tomorrow: all departures, capped at `limit`
 - Optionally filters by `directionId` (0 = outbound, 1 = inbound)
+- Optionally filters by `region` (`'Ida-Lõuna'`, `'Lääne'`, `'Edel'`) via `calendar[serviceIdx].region`
 - Both lists are sorted by `depMinutes` ascending
 - Each `Departure` object includes `originStop` and `terminalStop` (first/last stop of the trip)
 
@@ -177,11 +178,11 @@ Finds the first matching trip for `routeIdx + directionId`, then reads `stopTime
 ### Routes at a stop
 
 ```typescript
-const routes = getRoutesAtStop(stopIdx);
+const routes = getRoutesAtStop(stopIdx, region?);
 // Returns: [{ idx, shortName, longName, color }, ...]
 ```
 
-Collects unique `routeIdx` values from all entries in `stopTimesByStop[stopIdx]`.
+Collects unique `routeIdx` values from all entries in `stopTimesByStop[stopIdx]`. Optional `region` filter restricts to routes whose trips belong to that Elron corridor.
 
 ### Route directions at a stop
 
