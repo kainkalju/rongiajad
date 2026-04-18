@@ -6,6 +6,11 @@ import { initGtfs } from './parser';
 
 const GTFS_URL = 'https://eu-gtfs.remix.com/elron.zip';
 
+// Bump this whenever the GtfsData structure changes incompatibly.
+// gtfsLoader compares this against the stored value and falls back to
+// bundled data if they don't match (e.g. after an App Store upgrade).
+export const GTFS_SCHEMA_VERSION = 1;
+
 const NEEDED_FILES = [
   'routes.txt',
   'trips.txt',
@@ -90,7 +95,10 @@ export async function updateGtfsData(
     onStep('saving');
     const jsonFile = new File(Paths.document, 'gtfs.json');
     jsonFile.write(JSON.stringify(data));
-    await AsyncStorage.setItem('gtfs_updated_at', new Date().toISOString());
+    await AsyncStorage.multiSet([
+      ['gtfs_updated_at', new Date().toISOString()],
+      ['gtfs_schema_version', String(GTFS_SCHEMA_VERSION)],
+    ]);
 
     // Step 5: Hot-swap
     initGtfs(data);
