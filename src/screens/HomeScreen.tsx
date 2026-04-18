@@ -549,6 +549,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    marginLeft: 8,
   },
   routeBadgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
 });
