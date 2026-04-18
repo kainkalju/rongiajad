@@ -13,6 +13,10 @@ type AppStore = {
   location: Location;
   setLocation: (loc: Location) => void;
 
+  // GTFS data version — incremented after a runtime update so screens re-fetch
+  gtfsVersion: number;
+  bumpGtfsVersion: () => void;
+
   // Favourite stops
   favStops: FavStop[];
   addFavStop: (stop: Stop, region?: string | null) => void;
@@ -31,6 +35,9 @@ export const useStore = create<AppStore>()(
     (set, get) => ({
       location: null,
       setLocation: loc => set({ location: loc }),
+
+      gtfsVersion: 0,
+      bumpGtfsVersion: () => set(s => ({ gtfsVersion: s.gtfsVersion + 1 })),
 
       favStops: [],
       addFavStop: (stop, region) => {
@@ -68,7 +75,7 @@ export const useStore = create<AppStore>()(
     {
       name: 'rongiajad-store',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: state => ({ favStops: state.favStops, favRoutes: state.favRoutes }),
+      partialize: state => ({ favStops: state.favStops, favRoutes: state.favRoutes }), // gtfsVersion intentionally excluded
     }
   )
 );

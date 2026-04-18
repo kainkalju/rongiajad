@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { updateGtfsData, checkGtfsUpdateAvailable, type Step, type UpdateCheckResult } from '../data/gtfsUpdater';
+import { useStore } from '../store';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'About'>;
 
@@ -46,6 +47,7 @@ export default function AboutScreen({ navigation }: Props) {
   const [step, setStep] = useState<Step | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { bumpGtfsVersion } = useStore();
 
   const runUpdateCheck = useCallback(async (localIso: string | null) => {
     setUpdateCheck('checking');
@@ -72,6 +74,7 @@ export default function AboutScreen({ navigation }: Props) {
       await AsyncStorage.setItem('gtfs_updated_at', iso);
       setUpdatedAt(formatStoredDate(iso));
       setUpdateCheck('current');
+      bumpGtfsVersion();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Tundmatu viga');
     } finally {

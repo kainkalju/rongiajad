@@ -54,7 +54,7 @@ export default function HomeScreen({ navigation }: Props) {
     return () => anim.stop();
   }, [updateAvailable, blinkAnim]);
 
-  const { setLocation, favStops, favRoutes } = useStore();
+  const { setLocation, favStops, favRoutes, gtfsVersion } = useStore();
 
   useFocusEffect(useCallback(() => {
     (async () => {
@@ -113,7 +113,7 @@ export default function HomeScreen({ navigation }: Props) {
     const { today, tomorrow } = getUpcomingDepartures(activeStopIdx, currentNow);
     setTodayDeps(today);
     setTomorrowDeps(tomorrow);
-  }, [activeStopIdx]);
+  }, [activeStopIdx, gtfsVersion]);
 
   // Tick every minute
   useEffect(() => {

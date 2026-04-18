@@ -32,7 +32,7 @@ export default function StopScreen({ route, navigation }: Props) {
   const [tomorrowDeps, setTomorrowDeps] = useState<Departure[]>([]);
 
   const stop = getStop(stopIdx);
-  const { isFavStop, addFavStop, removeFavStop } = useStore();
+  const { isFavStop, addFavStop, removeFavStop, gtfsVersion } = useStore();
   const isFav = isFavStop(stopIdx, region);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function StopScreen({ route, navigation }: Props) {
     const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId, region);
     setTodayDeps(today);
     setTomorrowDeps(tomorrow);
-  }, [stopIdx]);
+  }, [stopIdx, gtfsVersion]);
 
   useEffect(() => {
     const timer = setInterval(() => {
