@@ -59,11 +59,11 @@ rongiajad/
 
 **Runtime GTFS update pipeline** (`src/data/`):
 - `buildGtfs.ts` — in-memory CSV parser; filters to Elron (`agency_id = '10520953'`) then builds the same compact `GtfsData` structure as the build-time script
-- `gtfsLoader.ts` — called at app startup; reads `gtfs.json` from device document directory (if present) and calls `initGtfs()` to hot-swap bundled data
-- `gtfsUpdater.ts` — full update pipeline: HEAD check (`checkGtfsUpdateAvailable`), download → unzip (JSZip) → process → save; progress callbacks drive the About screen UI
+- `gtfsLoader.ts` — called at app startup; checks `gtfs_schema_version` in AsyncStorage against `GTFS_SCHEMA_VERSION` constant; if missing or mismatched (e.g. after an App Store upgrade with a new data structure), silently uses bundled data; otherwise loads saved `gtfs.json` and calls `initGtfs()`
+- `gtfsUpdater.ts` — full update pipeline: HEAD check (`checkGtfsUpdateAvailable`), download → unzip (JSZip) → process → save; progress callbacks drive the About screen UI; exports `GTFS_SCHEMA_VERSION` constant (bump when `GtfsData` structure changes incompatibly)
 - `parser.ts` — `gtfs` ref is mutable; `initGtfs(data)` replaces it at runtime; all query functions automatically see the new data
 - Download source: `https://eu-gtfs.remix.com/elron.zip`
-- Update timestamp stored in `AsyncStorage` under key `gtfs_updated_at` (ISO string)
+- Update timestamp stored in `AsyncStorage` under key `gtfs_updated_at` (ISO string); schema version stored under `gtfs_schema_version` (integer string)
 
 ---
 
