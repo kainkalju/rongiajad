@@ -122,10 +122,6 @@ export default function SearchScreen({ navigation }: Props) {
                             route={r}
                             originStop={origin}
                             terminalStop={terminal}
-                            onPress={() => {
-                              Keyboard.dismiss();
-                              navigation.replace('Line', { routeIdx: r.idx, stopIdx: item.stop.idx });
-                            }}
                           />
                         );
                       })}
