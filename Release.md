@@ -1,5 +1,18 @@
 # Release notes
 
+## 1.2.0
+*2026-04-18*
+
+### New
+- Region context shown on favourite stops (e.g. Tallinn · Lääne suund)
+- Search stop results grouped by Elron direction region (Ida-Lõuna / Lääne / Edel)
+- Tapping a stop in search results navigates directly to the stop screen
+
+### Fixed
+- Departures refresh immediately after a runtime GTFS update
+
+---
+
 ## 1.1.0
 *2026-04-17*
 
