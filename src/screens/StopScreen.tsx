@@ -24,7 +24,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Stop'>;
 type Tab = 'praegu' | 'liinid';
 
 export default function StopScreen({ route, navigation }: Props) {
-  const { stopIdx, directionId } = route.params;
+  const { stopIdx, directionId, region } = route.params;
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<Tab>('praegu');
   const [now, setNow] = useState(new Date());
@@ -33,12 +33,12 @@ export default function StopScreen({ route, navigation }: Props) {
 
   const stop = getStop(stopIdx);
   const { isFavStop, addFavStop, removeFavStop } = useStore();
-  const isFav = isFavStop(stopIdx);
+  const isFav = isFavStop(stopIdx, region);
 
   useEffect(() => {
     const currentNow = new Date();
     setNow(currentNow);
-    const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId);
+    const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId, region);
     setTodayDeps(today);
     setTomorrowDeps(tomorrow);
   }, [stopIdx]);
@@ -47,7 +47,7 @@ export default function StopScreen({ route, navigation }: Props) {
     const timer = setInterval(() => {
       const currentNow = new Date();
       setNow(currentNow);
-      const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId);
+      const { today, tomorrow } = getUpcomingDepartures(stopIdx, currentNow, 30, directionId, region);
       setTodayDeps(today);
       setTomorrowDeps(tomorrow);
     }, 60_000);
@@ -55,7 +55,7 @@ export default function StopScreen({ route, navigation }: Props) {
   }, [stopIdx]);
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const routes = getRoutesAtStop(stopIdx);
+  const routes = getRoutesAtStop(stopIdx, region);
 
   return (
     <View style={styles.container}>
@@ -64,9 +64,14 @@ export default function StopScreen({ route, navigation }: Props) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.stopName} numberOfLines={1}>{stop.name}</Text>
+        <View style={styles.stopNameBlock}>
+          <Text style={styles.stopName} numberOfLines={1}>{stop.name}</Text>
+          {region && (
+            <Text style={styles.stopRegion}>{region} suund</Text>
+          )}
+        </View>
         <TouchableOpacity
-          onPress={() => isFav ? removeFavStop(stopIdx) : addFavStop(stop)}
+          onPress={() => isFav ? removeFavStop(stopIdx, region) : addFavStop(stop, region)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.starIcon}>{isFav ? '★' : '☆'}</Text>
@@ -233,11 +238,17 @@ const styles = StyleSheet.create({
   },
   backBtn: { marginRight: 4, padding: 8 },
   backIcon: { color: '#fff', fontSize: 26, fontWeight: '400', lineHeight: 28 },
+  stopNameBlock: { flex: 1 },
   stopName: {
-    flex: 1,
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
+  },
+  stopRegion: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 1,
   },
   starIcon: { color: '#fff', fontSize: 22, marginLeft: 8 },
   tabBar: {

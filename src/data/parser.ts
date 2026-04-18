@@ -146,7 +146,8 @@ export function getUpcomingDepartures(
   stopIdx: number,
   now: Date,
   limit = 20,
-  directionId?: number
+  directionId?: number,
+  region?: string | null
 ): { today: Departure[]; tomorrow: Departure[] } {
   const todayNum = dateToYYYYMMDD(now);
   const todayJSDay = now.getDay();
@@ -167,6 +168,7 @@ export function getUpcomingDepartures(
     if (!trip) continue;
     if (directionId !== undefined && trip[2] !== directionId) continue;
     const serviceIdx = trip[1];
+    if (region != null && (gtfs.calendar[serviceIdx]?.region ?? null) !== region) continue;
 
     const depMins = timeToMinutes(dep);
 
@@ -267,12 +269,14 @@ export function getStopsForRoute(
 // Routes served at a stop
 // ---------------------------------------------------------------------------
 
-export function getRoutesAtStop(stopIdx: number): Route[] {
+export function getRoutesAtStop(stopIdx: number, region?: string | null): Route[] {
   const stopTimes = gtfs.stopTimesByStop[stopIdx] ?? [];
   const routeIdxSet = new Set<number>();
   for (const [tripIdx] of stopTimes) {
     const trip = gtfs.trips[tripIdx];
-    if (trip) routeIdxSet.add(trip[0]);
+    if (!trip) continue;
+    if (region != null && (gtfs.calendar[trip[1]]?.region ?? null) !== region) continue;
+    routeIdxSet.add(trip[0]);
   }
   return Array.from(routeIdxSet).map(getRoute);
 }

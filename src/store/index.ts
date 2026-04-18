@@ -5,7 +5,7 @@ import type { Stop, Route } from '../data/types';
 
 type Location = { lat: number; lon: number } | null;
 
-type FavStop = { stopIdx: number; name: string };
+type FavStop = { stopIdx: number; name: string; region?: string | null };
 type FavRoute = { routeIdx: number; shortName: string; longName: string };
 
 type AppStore = {
@@ -15,9 +15,9 @@ type AppStore = {
 
   // Favourite stops
   favStops: FavStop[];
-  addFavStop: (stop: Stop) => void;
-  removeFavStop: (stopIdx: number) => void;
-  isFavStop: (stopIdx: number) => boolean;
+  addFavStop: (stop: Stop, region?: string | null) => void;
+  removeFavStop: (stopIdx: number, region?: string | null) => void;
+  isFavStop: (stopIdx: number, region?: string | null) => boolean;
 
   // Favourite routes
   favRoutes: FavRoute[];
@@ -33,14 +33,22 @@ export const useStore = create<AppStore>()(
       setLocation: loc => set({ location: loc }),
 
       favStops: [],
-      addFavStop: stop => {
+      addFavStop: (stop, region) => {
         const { favStops } = get();
-        if (favStops.some(s => s.stopIdx === stop.idx)) return;
-        set({ favStops: [...favStops, { stopIdx: stop.idx, name: stop.name }] });
+        const key = `${stop.idx}:${region ?? ''}`;
+        if (favStops.some(s => `${s.stopIdx}:${s.region ?? ''}` === key)) return;
+        set({ favStops: [...favStops, { stopIdx: stop.idx, name: stop.name, region: region ?? null }] });
       },
-      removeFavStop: stopIdx =>
-        set(s => ({ favStops: s.favStops.filter(x => x.stopIdx !== stopIdx) })),
-      isFavStop: stopIdx => get().favStops.some(s => s.stopIdx === stopIdx),
+      removeFavStop: (stopIdx, region) =>
+        set(s => ({
+          favStops: s.favStops.filter(x =>
+            !(x.stopIdx === stopIdx && (x.region ?? '') === (region ?? ''))
+          ),
+        })),
+      isFavStop: (stopIdx, region) =>
+        get().favStops.some(
+          s => s.stopIdx === stopIdx && (s.region ?? '') === (region ?? '')
+        ),
 
       favRoutes: [],
       addFavRoute: route => {

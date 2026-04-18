@@ -189,7 +189,7 @@ export default function HomeScreen({ navigation }: Props) {
           favStops={favStops}
           favRoutes={favRoutes}
           nowMinutes={nowMinutes}
-          onStopPress={stopIdx => navigation.navigate('Stop', { stopIdx })}
+          onStopPress={(stopIdx, region) => navigation.navigate('Stop', { stopIdx, region })}
           onRoutePress={routeIdx => navigation.navigate('Line', { routeIdx })}
         />
       )}
@@ -329,10 +329,10 @@ function LemmikudTab({
   onStopPress,
   onRoutePress,
 }: {
-  favStops: { stopIdx: number; name: string }[];
+  favStops: { stopIdx: number; name: string; region?: string | null }[];
   favRoutes: { routeIdx: number; shortName: string; longName: string }[];
   nowMinutes: number;
-  onStopPress: (idx: number) => void;
+  onStopPress: (idx: number, region?: string | null) => void;
   onRoutePress: (idx: number) => void;
 }) {
   if (favStops.length === 0 && favRoutes.length === 0) {
@@ -362,10 +362,15 @@ function LemmikudTab({
           return (
             <TouchableOpacity
               style={styles.favRow}
-              onPress={() => onStopPress(item.stopIdx)}
+              onPress={() => onStopPress(item.stopIdx, item.region)}
             >
               <Text style={styles.favIcon}>🚉</Text>
-              <Text style={styles.favName}>{item.name}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.favName}>{item.name}</Text>
+                {item.region && (
+                  <Text style={styles.favRegion}>{item.region} suund</Text>
+                )}
+              </View>
             </TouchableOpacity>
           );
         }
@@ -537,7 +542,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e5e5',
   },
   favIcon: { fontSize: 20, marginRight: 12 },
-  favName: { flex: 1, fontSize: 15, color: '#111' },
+  favName: { fontSize: 15, color: '#111' },
+  favRegion: { fontSize: 12, color: '#999', marginTop: 1 },
   routeBadge: {
     backgroundColor: '#ff711d',
     borderRadius: 8,

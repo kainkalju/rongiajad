@@ -98,16 +98,24 @@ export default function SearchScreen({ navigation }: Props) {
           if (item.type === 'stop') {
             const groups = getRouteDirectionsAtStopGrouped(item.stop.idx);
             return (
-              <TouchableOpacity
-                style={styles.stopRow}
-                onPress={() => {
-                  Keyboard.dismiss();
-                  navigation.replace('Stop', { stopIdx: item.stop.idx });
-                }}
-              >
-                <Text style={styles.stopName}>{item.stop.name}</Text>
+              <View style={styles.stopRow}>
+                <TouchableOpacity
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    navigation.replace('Stop', { stopIdx: item.stop.idx });
+                  }}
+                >
+                  <Text style={styles.stopName}>{item.stop.name}</Text>
+                </TouchableOpacity>
                 {groups.map((group, gi) => (
-                  <View key={`${group.region ?? 'other'}-${gi}`} style={styles.regionGroup}>
+                  <TouchableOpacity
+                    key={`${group.region ?? 'other'}-${gi}`}
+                    style={styles.regionGroup}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      navigation.replace('Stop', { stopIdx: item.stop.idx, region: group.region });
+                    }}
+                  >
                     {group.region && (
                       <Text style={styles.regionLabel}>{group.region} suund</Text>
                     )}
@@ -126,9 +134,9 @@ export default function SearchScreen({ navigation }: Props) {
                         );
                       })}
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 ))}
-              </TouchableOpacity>
+              </View>
             );
           }
           if (item.type === 'route') {
