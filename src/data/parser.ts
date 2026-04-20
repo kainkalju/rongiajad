@@ -203,10 +203,12 @@ export function getLineTimetableAtStop(
   stopIdx: number,
   routeIdx: number,
   dayType: DayType,
-  directionId?: 0 | 1
+  directionId?: 0 | 1,
+  date?: Date
 ): TimetableEntry[] {
   const stopTimes = gtfs.stopTimesByStop[stopIdx] ?? [];
   const minutesByHour: Record<number, number[]> = {};
+  const todayNum = date ? dateToYYYYMMDD(date) : null;
 
   for (const [tripIdx, , dep] of stopTimes) {
     const trip = gtfs.trips[tripIdx];
@@ -216,6 +218,11 @@ export function getLineTimetableAtStop(
     if (directionId !== undefined && tDirectionId !== directionId) continue;
 
     if (!isServiceOfDayType(serviceIdx, dayType)) continue;
+
+    if (todayNum !== null) {
+      const svc = gtfs.calendar[serviceIdx];
+      if (svc && (todayNum < svc.start || todayNum > svc.end)) continue;
+    }
 
     const depMins = timeToMinutes(dep);
     const h = Math.floor(depMins / 60) % 24;

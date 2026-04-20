@@ -55,9 +55,12 @@ export default function LineScreen({ route, navigation }: Props) {
   })();
   const focusedStop = focusedStopIdx !== undefined ? getStop(focusedStopIdx) : null;
 
+  const now = new Date();
+  const currentHour = now.getHours();
+
   const timetableEntries =
     focusedStopIdx !== undefined
-      ? getLineTimetableAtStop(focusedStopIdx, routeIdx, dayType, directionId)
+      ? getLineTimetableAtStop(focusedStopIdx, routeIdx, dayType, directionId, now)
       : [];
 
   const dirLabel = (() => {
@@ -65,9 +68,6 @@ export default function LineScreen({ route, navigation }: Props) {
     const to = dirStops[dirStops.length - 1]?.name ?? '';
     return `${from} → ${to}`;
   })();
-
-  const now = new Date();
-  const currentHour = now.getHours();
 
   return (
     <View style={styles.container}>
