@@ -95,7 +95,10 @@ export default function HomeScreen({ navigation }: Props) {
       const nearest = getNearestStops(lat, lon, 3);
       setNearestStops(nearest);
       if (nearest.length > 0) {
-        setActiveStopIdx(nearest[0].idx);
+        setActiveStopIdx(prev => {
+          const stillPresent = nearest.some(s => s.idx === prev);
+          return stillPresent ? prev : nearest[0].idx;
+        });
       }
       if (!silent) setLocationError(null);
     } catch {
