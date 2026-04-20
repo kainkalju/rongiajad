@@ -1,5 +1,17 @@
 # Release notes
 
+## 1.3.0
+*2026-04-20*
+
+### New
+- GPS location refreshes every 20 seconds on the Home screen
+
+### Fixed
+- User's selected stop is preserved across silent GPS refreshes (no more jumping back to the nearest stop mid-browse)
+- Expired timetable periods filtered out from the line timetable grid
+
+---
+
 ## 1.2.0
 *2026-04-18*
 
