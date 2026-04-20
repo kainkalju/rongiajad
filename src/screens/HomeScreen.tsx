@@ -78,13 +78,15 @@ export default function HomeScreen({ navigation }: Props) {
     })();
   }, [updateAvailable]));
 
-  const requestLocation = useCallback(async () => {
-    setLoading(true);
+  const requestLocation = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setLocationError('Asukoha luba puudub');
-        setLoading(false);
+        if (!silent) {
+          setLocationError('Asukoha luba puudub');
+          setLoading(false);
+        }
         return;
       }
       const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
@@ -95,15 +97,22 @@ export default function HomeScreen({ navigation }: Props) {
       if (nearest.length > 0) {
         setActiveStopIdx(nearest[0].idx);
       }
+      if (!silent) setLocationError(null);
     } catch {
-      setLocationError('Asukoht pole kättesaadav');
+      if (!silent) setLocationError('Asukoht pole kättesaadav');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [setLocation]);
 
   useEffect(() => {
     requestLocation();
+  }, [requestLocation]);
+
+  // Refresh GPS location every 20 seconds while screen is open
+  useEffect(() => {
+    const timer = setInterval(() => requestLocation(true), 20_000);
+    return () => clearInterval(timer);
   }, [requestLocation]);
 
   useEffect(() => {
