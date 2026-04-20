@@ -55,7 +55,7 @@ rongiajad/
 
 **State management:** Zustand for favourites and current location. `favStops` and `favRoutes` are persisted via `zustand/middleware persist` + `@react-native-async-storage/async-storage` (v2.2.0, pinned for Expo compatibility). Location state and `gtfsVersion` are intentionally not persisted. `gtfsVersion` is a counter bumped after a runtime GTFS update so that `HomeScreen` and `StopScreen` re-fetch departures immediately.
 
-**Location:** `expo-location` for GPS; nearest stop found by haversine distance against all stops.
+**Location:** `expo-location` for GPS; nearest stop found by haversine distance against all stops. HomeScreen silently refreshes GPS every 20 seconds; the user's manually selected stop is preserved unless it falls out of the refreshed nearest-stops list.
 
 **Runtime GTFS update pipeline** (`src/data/`):
 - `buildGtfs.ts` — in-memory CSV parser; filters to Elron (`agency_id = '10520953'`) then builds the same compact `GtfsData` structure as the build-time script
@@ -106,7 +106,7 @@ Quick-reference for locating code when making fixes or changes.
 |---|---|---|
 | Nearest stop from GPS | `src/data/parser.ts` | `getNearestStops(lat, lon, limit?)` |
 | Today's / tomorrow's departures at a stop | `src/data/parser.ts` | `getUpcomingDepartures(stopIdx, now, limit?, directionId?, region?)` |
-| Timetable grid data by day type | `src/data/parser.ts` | `getLineTimetableAtStop(stopIdx, routeIdx, dayType, directionId?)` |
+| Timetable grid data by day type | `src/data/parser.ts` | `getLineTimetableAtStop(stopIdx, routeIdx, dayType, directionId?, date?)` — pass `date` to exclude expired service periods |
 | All stops for a route (ordered) | `src/data/parser.ts` | `getStopsForRoute(routeIdx, directionId?)` |
 | All stops + times for one trip | `src/data/parser.ts` | `getStopsWithTimesForTrip(tripIdx)` |
 | Routes serving a stop | `src/data/parser.ts` | `getRoutesAtStop(stopIdx, region?)` |
