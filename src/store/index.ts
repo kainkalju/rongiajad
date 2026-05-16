@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Stop, Route } from '../data/types';
+import { getRouteByShortName, getStopByName } from '../data/parser';
 
 type Location = { lat: number; lon: number } | null;
 
@@ -16,6 +17,8 @@ type AppStore = {
   // GTFS data version — incremented after a runtime update so screens re-fetch
   gtfsVersion: number;
   bumpGtfsVersion: () => void;
+  // Re-resolves stored favourite indices after a GTFS update (indices may shift)
+  reresolveFavoriteIndices: () => void;
 
   // Favourite stops
   favStops: FavStop[];
@@ -38,6 +41,18 @@ export const useStore = create<AppStore>()(
 
       gtfsVersion: 0,
       bumpGtfsVersion: () => set(s => ({ gtfsVersion: s.gtfsVersion + 1 })),
+      reresolveFavoriteIndices: () => {
+        const { favRoutes, favStops } = get();
+        const newRoutes = favRoutes.map(r => {
+          const found = getRouteByShortName(r.shortName);
+          return found ? { ...r, routeIdx: found.idx } : r;
+        });
+        const newStops = favStops.map(s => {
+          const found = getStopByName(s.name);
+          return found ? { ...s, stopIdx: found.idx } : s;
+        });
+        set({ favRoutes: newRoutes, favStops: newStops });
+      },
 
       favStops: [],
       addFavStop: (stop, region) => {

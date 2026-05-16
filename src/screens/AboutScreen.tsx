@@ -47,7 +47,7 @@ export default function AboutScreen({ navigation }: Props) {
   const [step, setStep] = useState<Step | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { bumpGtfsVersion } = useStore();
+  const { bumpGtfsVersion, reresolveFavoriteIndices } = useStore();
 
   const runUpdateCheck = useCallback(async (localIso: string | null) => {
     setUpdateCheck('checking');
@@ -74,6 +74,7 @@ export default function AboutScreen({ navigation }: Props) {
       await AsyncStorage.setItem('gtfs_updated_at', iso);
       setUpdatedAt(formatStoredDate(iso));
       setUpdateCheck('current');
+      reresolveFavoriteIndices();
       bumpGtfsVersion();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Tundmatu viga');

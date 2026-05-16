@@ -68,6 +68,16 @@ export function getRoute(idx: number): Route {
   return { idx, shortName, longName, color };
 }
 
+export function getRouteByShortName(shortName: string): Route | undefined {
+  const idx = gtfs.routes.findIndex(r => r[0] === shortName);
+  return idx === -1 ? undefined : { idx, shortName: gtfs.routes[idx][0], longName: gtfs.routes[idx][1], color: gtfs.routes[idx][2] };
+}
+
+export function getStopByName(name: string): Stop | undefined {
+  const idx = gtfs.stops.findIndex(s => s[0] === name);
+  return idx === -1 ? undefined : { idx, name: gtfs.stops[idx][0], lat: gtfs.stops[idx][1], lon: gtfs.stops[idx][2] };
+}
+
 export function getTrip(tripIdx: number): [number, number, number, string, string] | undefined {
   return gtfs.trips[tripIdx] as [number, number, number, string, string] | undefined;
 }
