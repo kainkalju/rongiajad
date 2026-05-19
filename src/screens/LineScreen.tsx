@@ -78,12 +78,12 @@ export default function LineScreen({ route, navigation }: Props) {
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <View style={styles.lineNameRow}>
-            <View style={styles.shortNameBadge}>
-              <Text style={styles.shortNameText}>{lineRoute.shortName}</Text>
-            </View>
             <Text style={styles.lineName} numberOfLines={1}>
               {lineRoute.longName}
             </Text>
+            <View style={styles.shortNameBadge}>
+              <Text style={styles.shortNameText}>{lineRoute.shortName}</Text>
+            </View>
           </View>
           {focusedStop && (
             <Text style={styles.stopSubtitle} numberOfLines={1}>
