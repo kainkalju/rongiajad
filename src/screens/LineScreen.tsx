@@ -77,9 +77,14 @@ export default function LineScreen({ route, navigation }: Props) {
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.lineName} numberOfLines={1}>
-            {lineRoute.longName}
-          </Text>
+          <View style={styles.lineNameRow}>
+            <View style={styles.shortNameBadge}>
+              <Text style={styles.shortNameText}>{lineRoute.shortName}</Text>
+            </View>
+            <Text style={styles.lineName} numberOfLines={1}>
+              {lineRoute.longName}
+            </Text>
+          </View>
           {focusedStop && (
             <Text style={styles.stopSubtitle} numberOfLines={1}>
               {focusedStop.name}
@@ -197,7 +202,15 @@ const styles = StyleSheet.create({
   backBtn: { marginRight: 4, padding: 8 },
   backIcon: { color: '#fff', fontSize: 26, fontWeight: '400', lineHeight: 28 },
   headerInfo: { flex: 1 },
-  lineName: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  lineNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  shortNameBadge: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  shortNameText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  lineName: { color: '#fff', fontSize: 17, fontWeight: '700', flexShrink: 1 },
   stopSubtitle: { color: 'rgba(255,255,255,0.8)', fontSize: 13, marginTop: 2 },
   starIcon: { color: '#fff', fontSize: 22, marginLeft: 8 },
   tabBar: {
