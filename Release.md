@@ -1,5 +1,17 @@
 # Release notes
 
+## 1.4.0
+*2026-05-19*
+
+### New
+- Route short name badge shown in LineScreen header
+
+### Fixed
+- Favourites opening wrong route/stop after GTFS update
+- Expo and expo-file-system compatibility updates
+
+---
+
 ## 1.3.0
 *2026-04-20*
 
