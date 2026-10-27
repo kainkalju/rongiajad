@@ -106,7 +106,7 @@ export default function AboutScreen({ navigation }: Props) {
 
         <View style={styles.section}>
           <Text style={styles.label}>Kaasautor ja programmeerija</Text>
-          <Text style={styles.value}>Claude Sonnet 4.6</Text>
+          <Text style={styles.value}>Claude Sonnet 4.6 & Cursor Grok 4.7</Text>
         </View>
 
         <View style={styles.divider} />
