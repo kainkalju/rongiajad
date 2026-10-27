@@ -17,6 +17,7 @@ import {
   searchRoutes,
   getRouteDirectionsAtStopGrouped,
   getStopsForRoute,
+  preferredDirection,
 } from '../data/parser';
 import type { Stop, Route } from '../data/types';
 
@@ -140,7 +141,8 @@ export default function SearchScreen({ navigation }: Props) {
             );
           }
           if (item.type === 'route') {
-            const stopList = getStopsForRoute(item.route.idx, 0);
+            const directionId = preferredDirection(item.route.idx, item.route.longName);
+            const stopList = getStopsForRoute(item.route.idx, directionId);
             const origin = stopList[0]?.name;
             const terminal = stopList[stopList.length - 1]?.name;
             return (
@@ -148,7 +150,7 @@ export default function SearchScreen({ navigation }: Props) {
                 style={styles.routeRow}
                 onPress={() => {
                   Keyboard.dismiss();
-                  navigation.replace('Line', { routeIdx: item.route.idx });
+                  navigation.replace('Line', { routeIdx: item.route.idx, directionId });
                 }}
               >
                 <View style={styles.routeBadge}>

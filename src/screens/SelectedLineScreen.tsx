@@ -21,8 +21,9 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
 
   const trip = getTrip(tripIdx);
   const lineRoute = trip ? getRoute(trip[0]) : null;
+  const directionId: 0 | 1 = trip?.[2] === 1 ? 1 : 0;
   const { isFavRoute, addFavRoute, removeFavRoute } = useStore();
-  const isFav = lineRoute ? isFavRoute(lineRoute.idx) : false;
+  const isFav = lineRoute ? isFavRoute(lineRoute.idx, directionId) : false;
   const stopItems = getStopsWithTimesForTrip(tripIdx);
 
   const originStop = stopItems[0]?.stop.name ?? '';
@@ -64,7 +65,11 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
         <TouchableOpacity
-          onPress={() => lineRoute && (isFav ? removeFavRoute(lineRoute.idx) : addFavRoute(lineRoute))}
+          onPress={() => {
+            if (!lineRoute) return;
+            if (isFav) removeFavRoute(lineRoute.idx, directionId);
+            else addFavRoute(lineRoute, { directionId, originStop, terminalStop });
+          }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.starIcon}>{isFav ? '★' : '☆'}</Text>
@@ -85,7 +90,7 @@ export default function SelectedLineScreen({ route, navigation }: Props) {
           return (
             <TouchableOpacity
               style={[styles.row, isSelected && styles.rowSelected]}
-              onPress={() => navigation.navigate('Stop', { stopIdx: item.stop.idx, directionId: trip[2] })}
+              onPress={() => navigation.navigate('Stop', { stopIdx: item.stop.idx, directionId })}
             >
               <Text style={[styles.time, isPast && styles.timePast, isSelected && styles.timeSelected]}>
                 {timeLabel}

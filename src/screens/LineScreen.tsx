@@ -15,14 +15,26 @@ import {
   getStop,
   getStopsForRoute,
   getLineTimetableAtStop,
+  getDirectionEndpoints,
+  preferredDirection,
+  directionServingStop,
 } from '../data/parser';
 import TimetableGrid from '../components/TimetableGrid';
 import StopTimeline from '../components/StopTimeline';
-import type { DayType, Stop } from '../data/types';
+import type { DayType } from '../data/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Line'>;
 
 type View_ = 'peatused' | 'ajad';
+
+function initialDirection(routeIdx: number, stopIdx?: number, directionId?: number): 0 | 1 {
+  if (directionId === 0 || directionId === 1) return directionId;
+  if (stopIdx !== undefined) {
+    const serving = directionServingStop(routeIdx, stopIdx);
+    if (serving !== undefined) return serving;
+  }
+  return preferredDirection(routeIdx, getRoute(routeIdx).longName);
+}
 
 export default function LineScreen({ route, navigation }: Props) {
   const { routeIdx, stopIdx } = route.params;
@@ -30,21 +42,19 @@ export default function LineScreen({ route, navigation }: Props) {
 
   const lineRoute = getRoute(routeIdx);
   const { isFavRoute, addFavRoute, removeFavRoute } = useStore();
-  const isFav = isFavRoute(routeIdx);
 
   const [view, setView] = useState<View_>(stopIdx !== undefined ? 'ajad' : 'peatused');
   const [dayType, setDayType] = useState<DayType>('weekday');
-  const [directionId, setDirectionId] = useState<0 | 1>(0);
+  const [directionId, setDirectionId] = useState<0 | 1>(() =>
+    initialDirection(routeIdx, stopIdx, route.params.directionId)
+  );
+  const isFav = isFavRoute(routeIdx, directionId);
 
   // Stop lists per direction
   const stops0 = getStopsForRoute(routeIdx, 0);
   const stops1 = getStopsForRoute(routeIdx, 1);
   const hasMultipleDirections = stops0.length > 0 && stops1.length > 0;
 
-  // For "Peatused" tab always show canonical direction
-  const allStops = stops0.length > 0 ? stops0 : stops1;
-
-  // For "Ajad" tab use direction-specific stops
   const dirStops = directionId === 0
     ? (stops0.length > 0 ? stops0 : stops1)
     : (stops1.length > 0 ? stops1 : stops0);
@@ -69,6 +79,35 @@ export default function LineScreen({ route, navigation }: Props) {
     return `${from} → ${to}`;
   })();
 
+  const toggleDirection = () => {
+    const next: 0 | 1 = directionId === 0 ? 1 : 0;
+    const nextStops = next === 0
+      ? (stops0.length > 0 ? stops0 : stops1)
+      : (stops1.length > 0 ? stops1 : stops0);
+    const sameStation = focusedStop
+      ? nextStops.find(s => s.name === focusedStop.name)
+      : undefined;
+    setDirectionId(next);
+    navigation.setParams({
+      directionId: next,
+      stopIdx: sameStation?.idx ?? nextStops[0]?.idx,
+    });
+  };
+
+  const toggleFavourite = () => {
+    if (isFav) {
+      removeFavRoute(routeIdx, directionId);
+      return;
+    }
+    const ends = getDirectionEndpoints(routeIdx, directionId);
+    if (!ends) return;
+    addFavRoute(lineRoute, {
+      directionId,
+      originStop: ends.origin,
+      terminalStop: ends.terminal,
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -92,7 +131,7 @@ export default function LineScreen({ route, navigation }: Props) {
           )}
         </View>
         <TouchableOpacity
-          onPress={() => isFav ? removeFavRoute(routeIdx) : addFavRoute(lineRoute)}
+          onPress={toggleFavourite}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.starIcon}>{isFav ? '★' : '☆'}</Text>
@@ -119,8 +158,15 @@ export default function LineScreen({ route, navigation }: Props) {
         </TouchableOpacity>
       </View>
 
+      {hasMultipleDirections && (
+        <TouchableOpacity style={styles.directionRow} onPress={toggleDirection}>
+          <Text style={styles.directionLabel} numberOfLines={1}>{dirLabel}</Text>
+          <Text style={styles.directionIcon}>⇄</Text>
+        </TouchableOpacity>
+      )}
+
       {view === 'peatused' ? (
-        <StopTimeline stops={allStops} currentStopIdx={focusedStopIdx} />
+        <StopTimeline stops={dirStops} currentStopIdx={focusedStopIdx} />
       ) : (
         <View style={styles.timetableContainer}>
           {/* Day type selector */}
@@ -141,14 +187,6 @@ export default function LineScreen({ route, navigation }: Props) {
               );
             })}
           </View>
-
-          {/* Direction toggle */}
-          {hasMultipleDirections && (
-            <TouchableOpacity style={styles.directionRow} onPress={() => setDirectionId(d => d === 0 ? 1 : 0)}>
-              <Text style={styles.directionLabel} numberOfLines={1}>{dirLabel}</Text>
-              <Text style={styles.directionIcon}>⇄</Text>
-            </TouchableOpacity>
-          )}
 
           {/* Stop selector — horizontal scroll through direction stops */}
           <FlatList

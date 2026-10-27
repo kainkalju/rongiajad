@@ -15,7 +15,7 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
-import { useStore } from '../store';
+import { useStore, type FavRoute, type FavStop } from '../store';
 import { getNearestStops, getUpcomingDepartures, getStop } from '../data/parser';
 import { checkGtfsUpdateAvailable } from '../data/gtfsUpdater';
 import DepartureRow from '../components/DepartureRow';
@@ -200,9 +200,10 @@ export default function HomeScreen({ navigation }: Props) {
         <LemmikudTab
           favStops={favStops}
           favRoutes={favRoutes}
-          nowMinutes={nowMinutes}
           onStopPress={(stopIdx, region) => navigation.navigate('Stop', { stopIdx, region })}
-          onRoutePress={routeIdx => navigation.navigate('Line', { routeIdx })}
+          onRoutePress={(routeIdx, directionId) =>
+            navigation.navigate('Line', { routeIdx, directionId })
+          }
         />
       )}
     </View>
@@ -334,18 +335,23 @@ function GraafikTab({
 }
 
 // ---- Lemmikud sub-tab ----
+function favRouteLabel(route: FavRoute): string {
+  if (route.originStop && route.terminalStop) {
+    return `${route.originStop} → ${route.terminalStop}`;
+  }
+  return route.longName;
+}
+
 function LemmikudTab({
   favStops,
   favRoutes,
-  nowMinutes,
   onStopPress,
   onRoutePress,
 }: {
-  favStops: { stopIdx: number; name: string; region?: string | null }[];
-  favRoutes: { routeIdx: number; shortName: string; longName: string }[];
-  nowMinutes: number;
+  favStops: FavStop[];
+  favRoutes: FavRoute[];
   onStopPress: (idx: number, region?: string | null) => void;
-  onRoutePress: (idx: number) => void;
+  onRoutePress: (idx: number, directionId?: 0 | 1) => void;
 }) {
   if (favStops.length === 0 && favRoutes.length === 0) {
     return (
@@ -367,7 +373,9 @@ function LemmikudTab({
         ...favRoutes.map(r => ({ kind: 'route' as const, ...r })),
       ]}
       keyExtractor={item =>
-        item.kind === 'stop' ? `stop-${item.stopIdx}` : `route-${item.routeIdx}`
+        item.kind === 'stop'
+          ? `stop-${item.stopIdx}-${item.region ?? ''}`
+          : `route-${item.shortName}-${item.originStop ?? ''}-${item.terminalStop ?? ''}`
       }
       renderItem={({ item }) => {
         if (item.kind === 'stop') {
@@ -389,10 +397,15 @@ function LemmikudTab({
         return (
           <TouchableOpacity
             style={styles.favRow}
-            onPress={() => onRoutePress(item.routeIdx)}
+            onPress={() => onRoutePress(item.routeIdx, item.directionId)}
           >
             <Text style={styles.favIcon}>🚂</Text>
-            <Text style={styles.favName}>{item.longName}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.favName}>{favRouteLabel(item)}</Text>
+              {item.originStop && item.terminalStop ? (
+                <Text style={styles.favRegion}>{item.longName}</Text>
+              ) : null}
+            </View>
             <View style={styles.routeBadge}>
               <Text style={styles.routeBadgeText}>{item.shortName}</Text>
             </View>
