@@ -1,5 +1,20 @@
 # Release notes
 
+## 1.5.0
+*2026-10-27*
+
+### New
+- Favourite lines show the saved direction (origin → terminal) and open that way
+- Direction switch on the line stop list (Peatused), shared with the timetable
+- About screen credits Cursor Grok 4.7 alongside Claude Sonnet 4.6
+
+### Fixed
+- Favourited lines no longer flip direction after a GTFS bundle update
+- Favourite stops stay on the same platform when a station has two stop records
+- Expo and expo-file-system updated for SDK 54 compatibility
+
+---
+
 ## 1.4.0
 *2026-05-19*
 
